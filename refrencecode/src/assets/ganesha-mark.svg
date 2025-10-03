@@ -1,0 +1,12 @@
+<svg width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ganeshaTitle">
+  <title id="ganeshaTitle">Shuddh Swad Ganesha Emblem</title>
+  <defs>
+    <linearGradient id="ganeshaGradient" x1="8%" y1="12%" x2="92%" y2="88%">
+      <stop offset="0%" stop-color="#a03c34" />
+      <stop offset="100%" stop-color="#d47a36" />
+    </linearGradient>
+  </defs>
+  <circle cx="48" cy="48" r="44" fill="#f6e5c3" />
+  <path fill="url(#ganeshaGradient)" d="M48 18c11.046 0 20 8.954 20 20 0 7.795-4.483 14.536-11.035 17.664 5.341 1.824 9.035 6.97 9.035 12.847 0 7.78-6.3 14.09-14.08 14.09h-1.39c-5.348 0-10.03-3.495-11.614-8.59-.51-1.638.476-3.365 2.114-3.875 1.64-.51 3.365.476 3.875 2.115.64 2.059 2.53 3.45 4.625 3.45h1.39c3.27 0 5.93-2.66 5.93-5.93 0-3.27-2.66-5.93-5.93-5.93H44c-2.209 0-4-1.79-4-4s1.791-4 4-4h4c6.627 0 12-5.373 12-12s-5.373-12-12-12-12 5.373-12 12c0 1.58.31 3.088.87 4.472.641 1.636-.189 3.477-1.825 4.118-1.636.64-3.477-.19-4.118-1.826A19.93 19.93 0 0 1 28 38c0-11.046 8.954-20 20-20Z" />
+  <circle cx="63" cy="33" r="4.5" fill="#f0c75e" />
+</svg>
