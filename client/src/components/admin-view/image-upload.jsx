@@ -4,6 +4,7 @@ import { Label } from "../ui/label";
 import { useEffect, useRef } from "react";
 import { Button } from "../ui/button";
 import axios from "axios";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 import { Skeleton } from "../ui/skeleton";
 
 function ProductImageUpload({
@@ -49,10 +50,7 @@ function ProductImageUpload({
     setImageLoadingState(true);
     const data = new FormData();
     data.append("my_file", imageFile);
-    const response = await axios.post(
-      "http://localhost:5000/api/admin/products/upload-image",
-      data
-    );
+    const response = await axios.post(`${API_BASE}/api/admin/products/upload-image`, data);
     console.log(response, "response");
 
     if (response?.data?.success) {

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const initialState = {
   approvalURL: null,
@@ -12,10 +13,7 @@ const initialState = {
 export const createNewOrder = createAsyncThunk(
   "/order/createNewOrder",
   async (orderData) => {
-    const response = await axios.post(
-      "http://localhost:5000/api/shop/order/create",
-      orderData
-    );
+    const response = await axios.post(`${API_BASE}/api/shop/order/create`, orderData);
 
     return response.data;
   }
@@ -24,14 +22,11 @@ export const createNewOrder = createAsyncThunk(
 export const capturePayment = createAsyncThunk(
   "/order/capturePayment",
   async ({ paymentId, payerId, orderId }) => {
-    const response = await axios.post(
-      "http://localhost:5000/api/shop/order/capture",
-      {
-        paymentId,
-        payerId,
-        orderId,
-      }
-    );
+    const response = await axios.post(`${API_BASE}/api/shop/order/capture`, {
+      paymentId,
+      payerId,
+      orderId,
+    });
 
     return response.data;
   }
@@ -40,9 +35,7 @@ export const capturePayment = createAsyncThunk(
 export const getAllOrdersByUserId = createAsyncThunk(
   "/order/getAllOrdersByUserId",
   async (userId) => {
-    const response = await axios.get(
-      `http://localhost:5000/api/shop/order/list/${userId}`
-    );
+    const response = await axios.get(`${API_BASE}/api/shop/order/list/${userId}`);
 
     return response.data;
   }
@@ -51,9 +44,7 @@ export const getAllOrdersByUserId = createAsyncThunk(
 export const getOrderDetails = createAsyncThunk(
   "/order/getOrderDetails",
   async (id) => {
-    const response = await axios.get(
-      `http://localhost:5000/api/shop/order/details/${id}`
-    );
+    const response = await axios.get(`${API_BASE}/api/shop/order/details/${id}`);
 
     return response.data;
   }

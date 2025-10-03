@@ -25,6 +25,9 @@ import { useToast } from "@/components/ui/use-toast";
 import ProductDetailsDialog from "@/components/shopping-view/product-details";
 import { getFeatureImages } from "@/store/common-slice";
 import Carousel from "@/components/common/carousel";
+import ReviewsSection from "@/components/shopping-view/reviews-section";
+import ValuesSection from "@/components/shopping-view/values-section";
+import StorySection from "@/components/shopping-view/story-section";
 
 const categoriesWithIcon = [
   { id: "men", label: "Men", icon: ShirtIcon },
@@ -209,6 +212,9 @@ function ShoppingHome() {
           </div>
         </div>
       </section>
+      <ReviewsSection />
+      <ValuesSection />
+      <StorySection />
       <ProductDetailsDialog
         open={openDetailsDialog}
         setOpen={setOpenDetailsDialog}

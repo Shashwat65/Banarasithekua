@@ -20,14 +20,15 @@ const createOrder = async (req, res) => {
       cartId,
     } = req.body;
 
+    const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
     const create_payment_json = {
       intent: "sale",
       payer: {
         payment_method: "paypal",
       },
       redirect_urls: {
-        return_url: "http://localhost:5173/shop/paypal-return",
-        cancel_url: "http://localhost:5173/shop/paypal-cancel",
+        return_url: `${clientOrigin}/shop/paypal-return`,
+        cancel_url: `${clientOrigin}/shop/paypal-cancel`,
       },
       transactions: [
         {
