@@ -1,12 +1,6 @@
 import { Button } from "@/components/ui/button";
-import bannerOne from "../../assets/banner-1.webp";
-import bannerTwo from "../../assets/banner-2.webp";
-import bannerThree from "../../assets/banner-3.webp";
 import {
-  Airplay,
   BabyIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   CloudLightning,
   Heater,
   Images,
@@ -18,7 +12,7 @@ import {
   WatchIcon,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllFilteredProducts,
@@ -30,6 +24,7 @@ import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 import { useToast } from "@/components/ui/use-toast";
 import ProductDetailsDialog from "@/components/shopping-view/product-details";
 import { getFeatureImages } from "@/store/common-slice";
+import Carousel from "@/components/common/carousel";
 
 const categoriesWithIcon = [
   { id: "men", label: "Men", icon: ShirtIcon },
@@ -48,7 +43,6 @@ const brandsWithIcon = [
   { id: "h&m", label: "H&M", icon: Heater },
 ];
 function ShoppingHome() {
-  const [currentSlide, setCurrentSlide] = useState(0);
   const { productList, productDetails } = useSelector(
     (state) => state.shopProducts
   );
@@ -97,13 +91,7 @@ function ShoppingHome() {
     if (productDetails !== null) setOpenDetailsDialog(true);
   }, [productDetails]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prevSlide) => (prevSlide + 1) % featureImageList.length);
-    }, 15000);
-
-    return () => clearInterval(timer);
-  }, [featureImageList]);
+  const featuredProducts = useMemo(() => productList?.slice(0, 12) || [], [productList]);
 
   useEffect(() => {
     dispatch(
@@ -122,44 +110,32 @@ function ShoppingHome() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="relative w-full h-[600px] overflow-hidden">
-        {featureImageList && featureImageList.length > 0
-          ? featureImageList.map((slide, index) => (
-              <img
-                src={slide?.image}
-                key={index}
-                className={`${
-                  index === currentSlide ? "opacity-100" : "opacity-0"
-                } absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000`}
-              />
-            ))
-          : null}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() =>
-            setCurrentSlide(
-              (prevSlide) =>
-                (prevSlide - 1 + featureImageList.length) %
-                featureImageList.length
-            )
-          }
-          className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/80"
-        >
-          <ChevronLeftIcon className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() =>
-            setCurrentSlide(
-              (prevSlide) => (prevSlide + 1) % featureImageList.length
-            )
-          }
-          className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/80"
-        >
-          <ChevronRightIcon className="w-4 h-4" />
-        </Button>
+      {/* Hero carousel */}
+      <div className="relative w-full">
+        <Carousel
+          items={featureImageList || []}
+          renderItem={(slide) => (
+            <div className="relative">
+              <img src={slide?.image} className="w-full h-[420px] md:h-[560px] object-cover rounded-md" />
+              <div className="absolute inset-0 bg-black/30 rounded-md" />
+              <div className="absolute inset-0 flex items-center">
+                <div className="max-w-6xl mx-auto px-4 text-white">
+                  <h1 className="text-3xl md:text-5xl font-extrabold drop-shadow">Taste the Banarasi Tradition</h1>
+                  <p className="mt-3 max-w-xl text-sm md:text-base opacity-90">
+                    Authentic Banarasi Thekua baked fresh and delivered to your door. Perfect for gifting and celebrations.
+                  </p>
+                  <div className="mt-6 flex gap-3">
+                    <Button onClick={() => navigate('/shop/listing')}>Shop now</Button>
+                    <Button variant="outline" onClick={() => navigate('/shop/about')}>Learn more</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          autoPlayMs={8000}
+          className="h-full"
+          perView={1}
+        />
       </div>
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -205,19 +181,31 @@ function ShoppingHome() {
 
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Feature Products
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {productList && productList.length > 0
-              ? productList.map((productItem) => (
-                  <ShoppingProductTile
-                    handleGetProductDetails={handleGetProductDetails}
-                    product={productItem}
-                    handleAddtoCart={handleAddtoCart}
-                  />
-                ))
-              : null}
+          <h2 className="text-3xl font-bold text-center mb-8">Featured Products</h2>
+          {/* Product slider on large, grid on small */}
+          <div className="hidden md:block">
+            <Carousel
+              items={featuredProducts}
+              renderItem={(p) => (
+                <ShoppingProductTile
+                  handleGetProductDetails={handleGetProductDetails}
+                  product={p}
+                  handleAddtoCart={handleAddtoCart}
+                />
+              )}
+              autoPlayMs={7000}
+              perView={4}
+            />
+          </div>
+          <div className="grid md:hidden grid-cols-2 gap-4">
+            {featuredProducts.map((p) => (
+              <ShoppingProductTile
+                key={p?._id}
+                handleGetProductDetails={handleGetProductDetails}
+                product={p}
+                handleAddtoCart={handleAddtoCart}
+              />
+            ))}
           </div>
         </div>
       </section>

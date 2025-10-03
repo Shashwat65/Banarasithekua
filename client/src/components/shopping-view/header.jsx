@@ -1,4 +1,4 @@
-import { HousePlug, LogOut, Menu, ShoppingCart, UserCog } from "lucide-react";
+import { Cookie, LogOut, Menu, ShoppingCart, UserCog, Search } from "lucide-react";
 import {
   Link,
   useLocation,
@@ -50,7 +50,7 @@ function MenuItems() {
   }
 
   return (
-    <nav className="flex flex-col mb-3 lg:mb-0 lg:items-center gap-6 lg:flex-row">
+    <nav className="flex flex-wrap mb-3 lg:mb-0 lg:items-center gap-4 lg:gap-6 lg:flex-row">
       {shoppingViewHeaderMenuItems.map((menuItem) => (
         <Label
           onClick={() => handleNavigate(menuItem)}
@@ -83,6 +83,10 @@ function HeaderRightContent() {
 
   return (
     <div className="flex lg:items-center lg:flex-row flex-col gap-4">
+      <Button variant="outline" size="icon" onClick={() => navigate("/shop/search")}
+        className="lg:hidden">
+        <Search className="w-5 h-5" />
+      </Button>
       <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
         <Button
           onClick={() => setOpenCartSheet(true)}
@@ -139,8 +143,8 @@ function ShoppingHeader() {
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <Link to="/shop/home" className="flex items-center gap-2">
-          <HousePlug className="h-6 w-6" />
-          <span className="font-bold">Ecommerce</span>
+          <Cookie className="h-6 w-6" />
+          <span className="font-bold">Banarasi Thekua</span>
         </Link>
         <Sheet>
           <SheetTrigger asChild>
@@ -158,7 +162,10 @@ function ShoppingHeader() {
           <MenuItems />
         </div>
 
-        <div className="hidden lg:block">
+        <div className="hidden lg:flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={() => window.location.assign('/shop/search')} className="gap-2">
+            <Search className="w-4 h-4" /> Search
+          </Button>
           <HeaderRightContent />
         </div>
       </div>

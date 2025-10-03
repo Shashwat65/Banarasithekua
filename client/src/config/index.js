@@ -112,6 +112,7 @@ export const shoppingViewHeaderMenuItems = [
     label: "Products",
     path: "/shop/listing",
   },
+  // Category tabs
   {
     id: "men",
     label: "Men",
@@ -141,6 +142,37 @@ export const shoppingViewHeaderMenuItems = [
     id: "search",
     label: "Search",
     path: "/shop/search",
+  },
+  // Static pages
+  {
+    id: "about",
+    label: "About",
+    path: "/shop/about",
+  },
+  {
+    id: "contact",
+    label: "Contact",
+    path: "/shop/contact",
+  },
+  {
+    id: "privacy",
+    label: "Privacy",
+    path: "/shop/privacy-policy",
+  },
+  {
+    id: "terms",
+    label: "Terms",
+    path: "/shop/terms",
+  },
+  {
+    id: "refund",
+    label: "Refunds",
+    path: "/shop/refund-policy",
+  },
+  {
+    id: "shipping",
+    label: "Shipping",
+    path: "/shop/shipping-policy",
   },
 ];
 
