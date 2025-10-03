@@ -58,11 +58,11 @@ export const addProductFormElements = [
     name: "category",
     componentType: "select",
     options: [
-      { id: "men", label: "Men" },
-      { id: "women", label: "Women" },
-      { id: "kids", label: "Kids" },
-      { id: "accessories", label: "Accessories" },
-      { id: "footwear", label: "Footwear" },
+      { id: "traditional", label: "Traditional" },
+      { id: "premium", label: "Premium" },
+      { id: "gift-boxes", label: "Gift Boxes" },
+      { id: "festive", label: "Festive" },
+      { id: "bulk-orders", label: "Bulk Orders" },
     ],
   },
   {
@@ -70,12 +70,7 @@ export const addProductFormElements = [
     name: "brand",
     componentType: "select",
     options: [
-      { id: "nike", label: "Nike" },
-      { id: "adidas", label: "Adidas" },
-      { id: "puma", label: "Puma" },
-      { id: "levi", label: "Levi's" },
-      { id: "zara", label: "Zara" },
-      { id: "h&m", label: "H&M" },
+      { id: "banarasi-thekua", label: "Banarasi Thekua" },
     ],
   },
   {
@@ -109,44 +104,28 @@ export const shoppingViewHeaderMenuItems = [
   },
   {
     id: "products",
-    label: "Products",
+    label: "All Products",
     path: "/shop/listing",
   },
   // Category tabs
   {
-    id: "men",
-    label: "Men",
+    id: "traditional",
+    label: "Traditional",
     path: "/shop/listing",
   },
   {
-    id: "women",
-    label: "Women",
+    id: "premium",
+    label: "Premium",
     path: "/shop/listing",
   },
   {
-    id: "kids",
-    label: "Kids",
+    id: "gift-boxes",
+    label: "Gift Boxes",
     path: "/shop/listing",
   },
-  {
-    id: "footwear",
-    label: "Footwear",
-    path: "/shop/listing",
-  },
-  {
-    id: "accessories",
-    label: "Accessories",
-    path: "/shop/listing",
-  },
-  {
-    id: "search",
-    label: "Search",
-    path: "/shop/search",
-  },
-  // Static pages
   {
     id: "about",
-    label: "About",
+    label: "Our Story",
     path: "/shop/about",
   },
   {
@@ -154,60 +133,30 @@ export const shoppingViewHeaderMenuItems = [
     label: "Contact",
     path: "/shop/contact",
   },
-  {
-    id: "privacy",
-    label: "Privacy",
-    path: "/shop/privacy-policy",
-  },
-  {
-    id: "terms",
-    label: "Terms",
-    path: "/shop/terms",
-  },
-  {
-    id: "refund",
-    label: "Refunds",
-    path: "/shop/refund-policy",
-  },
-  {
-    id: "shipping",
-    label: "Shipping",
-    path: "/shop/shipping-policy",
-  },
 ];
 
 export const categoryOptionsMap = {
-  men: "Men",
-  women: "Women",
-  kids: "Kids",
-  accessories: "Accessories",
-  footwear: "Footwear",
+  traditional: "Traditional",
+  premium: "Premium",
+  "gift-boxes": "Gift Boxes",
+  festive: "Festive",
+  "bulk-orders": "Bulk Orders",
 };
 
 export const brandOptionsMap = {
-  nike: "Nike",
-  adidas: "Adidas",
-  puma: "Puma",
-  levi: "Levi",
-  zara: "Zara",
-  "h&m": "H&M",
+  "banarasi-thekua": "Banarasi Thekua",
 };
 
 export const filterOptions = {
   category: [
-    { id: "men", label: "Men" },
-    { id: "women", label: "Women" },
-    { id: "kids", label: "Kids" },
-    { id: "accessories", label: "Accessories" },
-    { id: "footwear", label: "Footwear" },
+    { id: "traditional", label: "Traditional" },
+    { id: "premium", label: "Premium" },
+    { id: "gift-boxes", label: "Gift Boxes" },
+    { id: "festive", label: "Festive" },
+    { id: "bulk-orders", label: "Bulk Orders" },
   ],
   brand: [
-    { id: "nike", label: "Nike" },
-    { id: "adidas", label: "Adidas" },
-    { id: "puma", label: "Puma" },
-    { id: "levi", label: "Levi's" },
-    { id: "zara", label: "Zara" },
-    { id: "h&m", label: "H&M" },
+    { id: "banarasi-thekua", label: "Banarasi Thekua" },
   ],
 };
 

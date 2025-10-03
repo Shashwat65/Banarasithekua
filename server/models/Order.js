@@ -26,8 +26,12 @@ const OrderSchema = new mongoose.Schema({
   totalAmount: Number,
   orderDate: Date,
   orderUpdateDate: Date,
+  // Legacy PayPal fields (kept for backward compatibility)
   paymentId: String,
   payerId: String,
+  // PhonePe fields
+  merchantTransactionId: String,
+  phonepeTransactionId: String,
 });
 
 module.exports = mongoose.model("Order", OrderSchema);

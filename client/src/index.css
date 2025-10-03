@@ -4,28 +4,28 @@
 
 @layer base {
   :root {
-    /* Banarasi warm palette */
-    --background: 42 56% 97%; /* cream */
-    --foreground: 23 71% 11%; /* deep brown text */
+    /* Modern premium food brand palette */
+    --background: 0 0% 100%; /* pure white */
+    --foreground: 20 14.3% 4.1%; /* dark charcoal */
     --card: 0 0% 100%;
-    --card-foreground: 23 71% 11%;
+    --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
-    --popover-foreground: 23 71% 11%;
-    --primary: 23 71% 28%; /* rich brown */
-    --primary-foreground: 42 56% 97%;
-    --secondary: 30 44% 92%; /* light sand */
-    --secondary-foreground: 23 71% 18%;
-    --muted: 30 44% 92%;
-    --muted-foreground: 23 20% 35%;
-    --accent: 17 70% 90%; /* soft peach */
-    --accent-foreground: 23 71% 18%;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 25 95% 53%; /* warm amber */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 4.8% 95.9%; /* light gray */
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 25 100% 97%; /* light amber */
+    --accent-foreground: 24 9.8% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 42 56% 97%;
-    --border: 30 30% 88%;
-    --input: 30 30% 88%;
-    --ring: 23 71% 28%;
-    --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 25 95% 53%;
+    --radius: 0.75rem;
+    --chart-1: 25 95% 53%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;

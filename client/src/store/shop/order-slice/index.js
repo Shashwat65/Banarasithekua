@@ -3,9 +3,10 @@ import axios from "axios";
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const initialState = {
-  approvalURL: null,
+  paymentURL: null,
   isLoading: false,
   orderId: null,
+  merchantTransactionId: null,
   orderList: [],
   orderDetails: null,
 };
@@ -21,13 +22,20 @@ export const createNewOrder = createAsyncThunk(
 
 export const capturePayment = createAsyncThunk(
   "/order/capturePayment",
-  async ({ paymentId, payerId, orderId }) => {
+  async ({ merchantTransactionId, orderId }) => {
     const response = await axios.post(`${API_BASE}/api/shop/order/capture`, {
-      paymentId,
-      payerId,
+      merchantTransactionId,
       orderId,
     });
 
+    return response.data;
+  }
+);
+
+export const checkPaymentStatus = createAsyncThunk(
+  "/order/checkPaymentStatus",
+  async (merchantTransactionId) => {
+    const response = await axios.get(`${API_BASE}/api/shop/order/payment-status/${merchantTransactionId}`);
     return response.data;
   }
 );
@@ -65,17 +73,23 @@ const shoppingOrderSlice = createSlice({
       })
       .addCase(createNewOrder.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.approvalURL = action.payload.approvalURL;
+        state.paymentURL = action.payload.paymentUrl;
         state.orderId = action.payload.orderId;
+        state.merchantTransactionId = action.payload.merchantTransactionId;
         sessionStorage.setItem(
           "currentOrderId",
           JSON.stringify(action.payload.orderId)
         );
+        sessionStorage.setItem(
+          "merchantTransactionId",
+          JSON.stringify(action.payload.merchantTransactionId)
+        );
       })
       .addCase(createNewOrder.rejected, (state) => {
         state.isLoading = false;
-        state.approvalURL = null;
+        state.paymentURL = null;
         state.orderId = null;
+        state.merchantTransactionId = null;
       })
       .addCase(getAllOrdersByUserId.pending, (state) => {
         state.isLoading = true;

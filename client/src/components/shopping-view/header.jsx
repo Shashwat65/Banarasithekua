@@ -31,7 +31,7 @@ function MenuItems() {
 
   function handleNavigate(getCurrentMenuItem) {
     sessionStorage.removeItem("filters");
-    const categoryIds = ["men", "women", "kids", "footwear", "accessories"];
+    const categoryIds = ["traditional", "premium", "gift-boxes", "festive", "bulk-orders"];
     const isCategory = categoryIds.includes(getCurrentMenuItem.id);
     const currentFilter = isCategory
       ? {
@@ -141,9 +141,16 @@ function ShoppingHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        <Link to="/shop/home" className="flex items-center gap-2">
-          <Cookie className="h-6 w-6" />
-          <span className="font-bold">Banarasi Thekua</span>
+        <Link to="/shop/home" className="flex items-center gap-3">
+          <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-2 rounded-lg">
+            <Cookie className="h-6 w-6 text-white" />
+          </div>
+          <div className="hidden sm:block">
+            <span className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              Banarasi Thekua
+            </span>
+            <p className="text-xs text-gray-500 font-medium">Authentic Traditional Sweets</p>
+          </div>
         </Link>
         <Sheet>
           <SheetTrigger asChild>
