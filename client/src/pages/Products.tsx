@@ -114,6 +114,53 @@ export default function Products() {
             })}
           </div>
         )}
+
+        {/* Combo Product Section */}
+  <section id="combos" className="pt-12 md:pt-20 space-y-8">
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <p className="text-[10px] sm:text-xs uppercase tracking-[0.55em] text-secondary/50">Value Combos</p>
+            <h2 className="text-3xl md:text-4xl font-semibold">Combo Packs & Hampers</h2>
+            <p className="text-secondary/70 text-sm md:text-base">
+              Curated bundles for gifting and celebrations. Save more when you pick our pre-set assortments of hand-crafted thekua.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              {
+                title: "Festive Trio Pack",
+                copy: "Traditional + Jaggery + Coconut (300g each)",
+                save: "Save 12%",
+              },
+              {
+                title: "Celebration Family Box",
+                copy: "5 Signature Flavours • 1.5kg total",
+                save: "Save 18%",
+              },
+              {
+                title: "Corporate Gifting Set",
+                copy: "10 Mini Jars + Custom Message Cards",
+                save: "Bulk Pricing",
+              },
+            ].map((combo, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl border border-border/60 bg-white/70 backdrop-blur-sm p-6 flex flex-col shadow-[0_20px_40px_rgba(84,48,33,0.10)]"
+              >
+                <div className="flex-1 space-y-3">
+                  <p className="text-xs tracking-[0.45em] uppercase text-secondary/50">Combo</p>
+                  <h3 className="text-xl font-semibold text-secondary">{combo.title}</h3>
+                  <p className="text-sm text-secondary/70">{combo.copy}</p>
+                  <span className="inline-flex w-fit text-[10px] uppercase tracking-[0.35em] bg-accent text-accent-foreground font-medium px-3 py-1 rounded-full">{combo.save}</span>
+                </div>
+                <button
+                  className="mt-6 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold px-5 py-2.5 hover:bg-primary/90 transition"
+                >
+                  View Options
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

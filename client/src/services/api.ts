@@ -73,12 +73,12 @@ export const productsAPI = {
 
 // Categories API (placeholder until backend support is available)
 export const categoriesAPI = {
-  getAll: () => Promise.resolve({ data: { data: [] } }),
-  getById: (_id: string) => Promise.resolve({ data: { data: null } }),
-  getBySlug: (_slug: string) => Promise.resolve({ data: { data: null } }),
-  create: (_data: any) => Promise.reject(new Error("Categories API not yet configured")),
-  update: (_id: string, _data: any) => Promise.reject(new Error("Categories API not yet configured")),
-  delete: (_id: string) => Promise.reject(new Error("Categories API not yet configured")),
+  getAll: () => api.get('/admin/categories/get'),
+  getById: (id: string) => api.get(`/admin/categories/get/${id}`), // not implemented server-side but reserved
+  getBySlug: (slug: string) => api.get(`/admin/categories/slug/${slug}`), // placeholder
+  create: (data: any) => api.post('/admin/categories/add', data),
+  update: (id: string, data: any) => api.put(`/admin/categories/edit/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/categories/delete/${id}`),
 };
 
 // Orders API
@@ -98,21 +98,25 @@ export const paymentAPI = {
 
 // Upload API
 export const uploadAPI = {
-  uploadImage: (formData: FormData) =>
-    api.post("/admin/products/upload-image", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
+  uploadImage: (formData: FormData) => {
+    // Backend expects field name 'my_file' in route definition; if user used 'image', duplicate it.
+    if (!formData.get('my_file') && formData.get('image')) {
+      formData.append('my_file', formData.get('image') as any);
+    }
+    return api.post('/admin/products/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  deleteImage: (_publicId: string) => Promise.reject(new Error('Delete image endpoint not implemented')),
 };
 
 // Admin API placeholders
 export const adminAPI = {
-  getDashboard: () => Promise.reject(new Error("Admin dashboard API not yet configured")),
-  getUsers: (_params?: Record<string, any>) => Promise.reject(new Error("Admin users API not yet configured")),
-  updateUserRole: (_id: string, _data: any) => Promise.reject(new Error("Admin users API not yet configured")),
-  deleteUser: (_id: string) => Promise.reject(new Error("Admin users API not yet configured")),
-  createAdmin: (_data: any) => Promise.reject(new Error("Admin users API not yet configured")),
+  getDashboard: () => api.get('/admin/metrics/summary', { headers: { 'x-no-redirect-on-401': '1' } }), // placeholder route
+  getUsers: (params?: Record<string, any>) => api.get('/admin/users/list', { params }),
+  updateUserRole: (id: string, data: any) => api.put(`/admin/users/role/${id}`, data),
+  deleteUser: (id: string) => api.delete(`/admin/users/delete/${id}`),
+  createAdmin: (data: any) => api.post('/admin/users/bootstrap', data),
 };
 
 export default api;

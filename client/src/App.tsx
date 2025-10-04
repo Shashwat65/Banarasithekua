@@ -27,6 +27,7 @@ import ShippingPolicy from "@/pages/ShippingPolicy";
 import CancellationPolicy from "@/pages/CancellationPolicy";
 import CookiePolicy from "@/pages/CookiePolicy";
 import Disclaimer from "@/pages/Disclaimer";
+import WhatsappFloat from "@/components/WhatsappFloat";
 
 const queryClient = new QueryClient();
 
@@ -106,6 +107,7 @@ const App = () => (
               <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <WhatsappFloat />
           </BrowserRouter>
         </CartProvider>
       </AuthProvider>

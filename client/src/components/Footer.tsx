@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Mail } from "lucide-react";
+import { Instagram, Facebook, Mail, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import ganeshaMark from "@/assets/ganesha-mark.svg";
 
@@ -44,6 +44,15 @@ const Footer = () => {
               >
                 <Mail className="h-5 w-5" />
               </a>
+              <a
+                href="https://wa.me/919981155442?text=Hi!%20I%20would%20like%20to%20know%20more%20about%20Banarasi%20Thekua."
+                aria-label="WhatsApp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#f6f1e9] transition"
+              >
+                <MessageCircle className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
@@ -52,6 +61,8 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-[#f6f1e9]/70">
               <li><a href="#hero" className="hover:text-[#f6f1e9] transition">Home</a></li>
               <li><a href="#products" className="hover:text-[#f6f1e9] transition">Shop</a></li>
+              <li><a href="/products#combos" className="hover:text-[#f6f1e9] transition">Combos</a></li>
+              <li><a href="#team" className="hover:text-[#f6f1e9] transition">Team</a></li>
               <li><Link to="/about" className="hover:text-[#f6f1e9] transition">About Us</Link></li>
               <li><a href="#reviews" className="hover:text-[#f6f1e9] transition">Testimonials</a></li>
               <li><Link to="/contact" className="hover:text-[#f6f1e9] transition">Contact</Link></li>
