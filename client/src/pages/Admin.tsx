@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { categoriesAPI, productsAPI, ordersAPI, adminAPI, uploadAPI, combosAPI } from "@/services/api";
+import { categoriesAPI, productsAPI, ordersAPI, adminAPI, uploadAPI, combosAPI, teamAPI } from "@/services/api";
 import {
   LayoutDashboard,
   ShoppingBasket,
@@ -74,11 +74,15 @@ export default function Admin() {
   const [slugEdited, setSlugEdited] = useState(false);
   const [bootstrap, setBootstrap] = useState({ email: "", password: "", adminSecret: "" });
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
-  const [active, setActive] = useState<"dashboard" | "products" | "orders" | "categories" | "combos" | "images" | "slider" | "users">("dashboard");
+  const [active, setActive] = useState<"dashboard" | "products" | "orders" | "categories" | "combos" | "team" | "images" | "slider" | "users">("dashboard");
   // Combos state
   const [combos, setCombos] = useState<any[]>([]);
   const [comboForm, setComboForm] = useState({ name: "", slug: "", description: "", price: "", originalPrice: "", productIds: "", active: true });
   const [comboLoading, setComboLoading] = useState(false);
+  // Team state
+  const [team, setTeam] = useState<any[]>([]);
+  const [teamForm, setTeamForm] = useState({ name: "", role: "", photo: "", order: "0", active: true });
+  const loadTeam = async () => { try { const res = await teamAPI.getAll(); setTeam(res.data.data || []); } catch { /* ignore */ } };
 
   const loadCombos = async () => {
     try {
@@ -177,6 +181,7 @@ export default function Admin() {
     loadProducts();
     loadOrders();
     loadCombos();
+    loadTeam();
   }, [user]);
 
   const submitCategory = async (e: FormEvent) => {
@@ -456,6 +461,9 @@ export default function Admin() {
             <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='combos'?'bg-muted':''}`} onClick={() => setActive('combos')}>
               <ShoppingBasket className="h-4 w-4" /> Combos
             </button>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='team'?'bg-muted':''}`} onClick={() => setActive('team')}>
+              <Users className="h-4 w-4" /> Team
+            </button>
             <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='users'?'bg-muted':''}`} onClick={() => { setActive('users'); if (users.length === 0) loadUsers(); }}>
               <Users className="h-4 w-4" /> Users
             </button>
@@ -488,6 +496,8 @@ export default function Admin() {
                   ? 'Categories'
                   : active === 'combos'
                   ? 'Combos'
+                  : active === 'team'
+                  ? 'Team'
                   : active === 'users'
                   ? 'Users'
                   : active === 'images'
@@ -623,6 +633,47 @@ export default function Admin() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Button size="sm" variant="outline" onClick={async () => { if (!confirm('Delete combo?')) return; try { await combosAPI.delete(c._id); toast('Deleted'); loadCombos(); } catch (e:any) { toast(e.response?.data?.message || 'Delete failed'); } }}>Delete</Button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {active === 'team' && (
+            <Card>
+              <CardHeader><CardTitle>Team Members</CardTitle></CardHeader>
+              <CardContent className="space-y-6">
+                <form onSubmit={async (e) => { e.preventDefault(); try { const payload = { name: teamForm.name, role: teamForm.role, photo: teamForm.photo, order: Number(teamForm.order)||0, active: teamForm.active }; await teamAPI.create(payload); toast('Member added'); setTeamForm({ name:'', role:'', photo:'', order:'0', active:true }); loadTeam(); } catch (err:any){ toast(err.response?.data?.message || 'Failed to add'); } }} className="space-y-3">
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <Input placeholder="Name" value={teamForm.name} onChange={(e)=>setTeamForm(p=>({...p,name:e.target.value}))} required />
+                    <Input placeholder="Role" value={teamForm.role} onChange={(e)=>setTeamForm(p=>({...p,role:e.target.value}))} required />
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <Input placeholder="Photo URL" value={teamForm.photo} onChange={(e)=>setTeamForm(p=>({...p,photo:e.target.value}))} />
+                    <Input placeholder="Order" type="number" value={teamForm.order} onChange={(e)=>setTeamForm(p=>({...p,order:e.target.value}))} />
+                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={teamForm.active} onChange={(e)=>setTeamForm(p=>({...p,active:e.target.checked}))} /> Active</label>
+                  </div>
+                  <Button type="submit">Add Member</Button>
+                </form>
+                <div className="space-y-3 text-sm">
+                  {team.length === 0 ? <p className="text-muted-foreground">No members yet.</p> : (
+                    <ul className="space-y-2">
+                      {team.map(m => (
+                        <li key={m._id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border/30 pb-2">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <img src={m.photo || 'https://placehold.co/48x48'} alt={m.name} className="h-10 w-10 rounded-full object-cover border" />
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{m.name} {m.active ? '' : <span className='text-red-500 text-xs'>(inactive)</span>}</p>
+                              <p className="text-xs text-muted-foreground truncate">{m.role}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline" onClick={async ()=>{ const newActive = !m.active; try { await teamAPI.update(m._id, { active:newActive }); setTeam(prev=>prev.map(x=>x._id===m._id?{...x,active:newActive}:x)); } catch(e:any){ toast(e.response?.data?.message || 'Update failed'); } }}>{m.active ? 'Disable' : 'Enable'}</Button>
+                            <Button size="sm" variant="outline" onClick={async ()=>{ if(!confirm('Delete member?')) return; try { await teamAPI.delete(m._id); toast('Deleted'); setTeam(prev=>prev.filter(x=>x._id!==m._id)); } catch(e:any){ toast(e.response?.data?.message || 'Delete failed'); } }}>Delete</Button>
                           </div>
                         </li>
                       ))}
