@@ -6,6 +6,8 @@ require("dotenv").config();
 const authRouter = require("./routes/auth/auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
 const adminOrderRouter = require("./routes/admin/order-routes");
+const adminCategoryRouter = require("./routes/admin/category-routes");
+const adminUserRouter = require("./routes/admin/user-routes");
 
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
@@ -87,6 +89,8 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/admin/orders", adminOrderRouter);
+app.use("/api/admin/categories", adminCategoryRouter);
+app.use("/api/admin/users", adminUserRouter);
 
 app.use("/api/shop/products", shopProductsRouter);
 app.use("/api/shop/cart", shopCartRouter);

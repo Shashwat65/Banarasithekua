@@ -1,21 +1,28 @@
 const { imageUploadUtil } = require("../../helpers/cloudinary");
 const Product = require("../../models/Product");
+const { authMiddleware } = require("../auth/auth-controller");
 
 const handleImageUpload = async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
     const b64 = Buffer.from(req.file.buffer).toString("base64");
     const url = "data:" + req.file.mimetype + ";base64," + b64;
     const result = await imageUploadUtil(url);
 
-    res.json({
-      success: true,
-      result,
-    });
+    res.json({ success: true, data: {
+      url: result.secure_url || result.url,
+      public_id: result.public_id,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+    }});
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       success: false,
-      message: "Error occured",
+      message: "Error occured while uploading",
     });
   }
 };
@@ -23,43 +30,30 @@ const handleImageUpload = async (req, res) => {
 //add a new product
 const addProduct = async (req, res) => {
   try {
-    const {
-      image,
-      title,
-      description,
-      category,
-      brand,
-      price,
-      salePrice,
-      totalStock,
-      averageReview,
-    } = req.body;
-
-    console.log(averageReview, "averageReview");
-
-    const newlyCreatedProduct = new Product({
-      image,
-      title,
-      description,
-      category,
-      brand,
-      price,
-      salePrice,
-      totalStock,
-      averageReview,
+    const body = req.body;
+    // Accept both legacy and new naming
+    const product = new Product({
+      name: body.name || body.title,
+      title: body.title || body.name, // keep legacy field populated
+      slug: body.slug,
+      description: body.description,
+      price: body.price,
+      originalPrice: body.originalPrice || body.salePrice,
+      salePrice: body.salePrice || body.originalPrice,
+      stock: body.stock || body.totalStock,
+      totalStock: body.totalStock || body.stock,
+      category: body.category || body.categoryId || null,
+      brand: body.brand,
+      weight: body.weight,
+      packSize: body.packSize,
+      image: body.image,
+      images: Array.isArray(body.images) ? body.images.slice(0, 8) : [],
     });
-
-    await newlyCreatedProduct.save();
-    res.status(201).json({
-      success: true,
-      data: newlyCreatedProduct,
-    });
+    await product.save();
+    res.status(201).json({ success: true, data: product });
   } catch (e) {
     console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Error occured",
-    });
+    res.status(500).json({ success: false, message: 'Error occured' });
   }
 };
 
@@ -67,17 +61,11 @@ const addProduct = async (req, res) => {
 
 const fetchAllProducts = async (req, res) => {
   try {
-    const listOfProducts = await Product.find({});
-    res.status(200).json({
-      success: true,
-      data: listOfProducts,
-    });
+    const list = await Product.find({}).populate('category');
+    res.json({ success: true, data: list });
   } catch (e) {
     console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Error occured",
-    });
+    res.status(500).json({ success: false, message: 'Error occured' });
   }
 };
 
@@ -85,47 +73,35 @@ const fetchAllProducts = async (req, res) => {
 const editProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      image,
-      title,
-      description,
-      category,
-      brand,
-      price,
-      salePrice,
-      totalStock,
-      averageReview,
-    } = req.body;
+    const body = req.body;
+    const product = await Product.findById(id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
-    let findProduct = await Product.findById(id);
-    if (!findProduct)
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
+    const assign = (field, value) => {
+      if (typeof value !== 'undefined') product[field] = value;
+    };
 
-    findProduct.title = title || findProduct.title;
-    findProduct.description = description || findProduct.description;
-    findProduct.category = category || findProduct.category;
-    findProduct.brand = brand || findProduct.brand;
-    findProduct.price = price === "" ? 0 : price || findProduct.price;
-    findProduct.salePrice =
-      salePrice === "" ? 0 : salePrice || findProduct.salePrice;
-    findProduct.totalStock = totalStock || findProduct.totalStock;
-    findProduct.image = image || findProduct.image;
-    findProduct.averageReview = averageReview || findProduct.averageReview;
+    assign('name', body.name);
+    assign('title', body.title || body.name);
+    assign('slug', body.slug);
+    assign('description', body.description);
+    assign('price', body.price);
+    assign('originalPrice', body.originalPrice);
+    assign('salePrice', body.salePrice);
+    assign('stock', body.stock);
+    assign('totalStock', body.totalStock);
+    assign('category', body.category || body.categoryId);
+    assign('brand', body.brand);
+    assign('weight', body.weight);
+    assign('packSize', body.packSize);
+    assign('image', body.image);
+    if (Array.isArray(body.images)) product.images = body.images.slice(0, 8);
 
-    await findProduct.save();
-    res.status(200).json({
-      success: true,
-      data: findProduct,
-    });
+    await product.save();
+    res.json({ success: true, data: product });
   } catch (e) {
     console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Error occured",
-    });
+    res.status(500).json({ success: false, message: 'Error occured' });
   }
 };
 
