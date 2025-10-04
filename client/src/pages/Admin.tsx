@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { categoriesAPI, productsAPI, ordersAPI, adminAPI, uploadAPI } from "@/services/api";
+import { categoriesAPI, productsAPI, ordersAPI, adminAPI, uploadAPI, combosAPI } from "@/services/api";
 import {
   LayoutDashboard,
   ShoppingBasket,
@@ -74,9 +74,20 @@ export default function Admin() {
   const [slugEdited, setSlugEdited] = useState(false);
   const [bootstrap, setBootstrap] = useState({ email: "", password: "", adminSecret: "" });
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
-  const [active, setActive] = useState<
-    "dashboard" | "products" | "orders" | "categories" | "images" | "slider" | "users"
-  >("dashboard");
+  const [active, setActive] = useState<"dashboard" | "products" | "orders" | "categories" | "combos" | "images" | "slider" | "users">("dashboard");
+  // Combos state
+  const [combos, setCombos] = useState<any[]>([]);
+  const [comboForm, setComboForm] = useState({ name: "", slug: "", description: "", price: "", originalPrice: "", productIds: "", active: true });
+  const [comboLoading, setComboLoading] = useState(false);
+
+  const loadCombos = async () => {
+    try {
+      const res = await combosAPI.getAllAdmin();
+      setCombos(res.data.data || []);
+    } catch (e) {
+      // silent
+    }
+  };
   const [showAddProduct, setShowAddProduct] = useState<boolean>(true);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -165,6 +176,7 @@ export default function Admin() {
     loadCategories();
     loadProducts();
     loadOrders();
+    loadCombos();
   }, [user]);
 
   const submitCategory = async (e: FormEvent) => {
@@ -441,6 +453,9 @@ export default function Admin() {
             <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='categories'?'bg-muted':''}`} onClick={() => setActive('categories')}>
               <Layers className="h-4 w-4" /> Categories
             </button>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='combos'?'bg-muted':''}`} onClick={() => setActive('combos')}>
+              <ShoppingBasket className="h-4 w-4" /> Combos
+            </button>
             <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='users'?'bg-muted':''}`} onClick={() => { setActive('users'); if (users.length === 0) loadUsers(); }}>
               <Users className="h-4 w-4" /> Users
             </button>
@@ -471,6 +486,8 @@ export default function Admin() {
                   ? 'Orders'
                   : active === 'categories'
                   ? 'Categories'
+                  : active === 'combos'
+                  ? 'Combos'
                   : active === 'users'
                   ? 'Users'
                   : active === 'images'
@@ -540,6 +557,78 @@ export default function Admin() {
                     </li>
                   ))}
                 </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Combos */}
+          {active === 'combos' && (
+            <Card>
+              <CardHeader><CardTitle>Combos</CardTitle></CardHeader>
+              <CardContent className="space-y-6">
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    try {
+                      setComboLoading(true);
+                      const payload: any = {
+                        name: comboForm.name,
+                        slug: comboForm.slug || slugify(comboForm.name),
+                        description: comboForm.description,
+                        price: comboForm.price ? Number(comboForm.price) : undefined,
+                        originalPrice: comboForm.originalPrice ? Number(comboForm.originalPrice) : undefined,
+                        products: comboForm.productIds
+                          .split(',')
+                          .map((x) => x.trim())
+                          .filter(Boolean),
+                        active: comboForm.active,
+                      };
+                      await combosAPI.create(payload);
+                      toast('Combo created');
+                      setComboForm({ name: '', slug: '', description: '', price: '', originalPrice: '', productIds: '', active: true });
+                      loadCombos();
+                    } catch (err: any) {
+                      toast(err.response?.data?.message || 'Failed to create combo');
+                    } finally {
+                      setComboLoading(false);
+                    }
+                  }}
+                  className="space-y-3"
+                >
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <Input placeholder="Name" value={comboForm.name} onChange={(e) => setComboForm((p) => ({ ...p, name: e.target.value, slug: slugEdited ? p.slug : slugify(e.target.value) }))} required />
+                    <Input placeholder="Slug" value={comboForm.slug} onChange={(e) => setComboForm((p) => ({ ...p, slug: slugify(e.target.value) }))} />
+                  </div>
+                  <Textarea placeholder="Description" value={comboForm.description} onChange={(e) => setComboForm((p) => ({ ...p, description: e.target.value }))} />
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <Input placeholder="Price" type="number" value={comboForm.price} onChange={(e) => setComboForm((p) => ({ ...p, price: e.target.value }))} />
+                    <Input placeholder="Original Price" type="number" value={comboForm.originalPrice} onChange={(e) => setComboForm((p) => ({ ...p, originalPrice: e.target.value }))} />
+                    <Input placeholder="Product IDs (comma separated)" value={comboForm.productIds} onChange={(e) => setComboForm((p) => ({ ...p, productIds: e.target.value }))} />
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={comboForm.active} onChange={(e) => setComboForm((p) => ({ ...p, active: e.target.checked }))} /> Active</label>
+                  </div>
+                  <Button type="submit" disabled={comboLoading}>{comboLoading ? 'Saving...' : 'Create Combo'}</Button>
+                </form>
+                <div className="space-y-3 text-sm">
+                  {combos.length === 0 ? (
+                    <p className="text-muted-foreground">No combos yet.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {combos.map((c) => (
+                        <li key={c._id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border/30 pb-2">
+                          <div className="space-y-1">
+                            <p className="font-medium">{c.name} {c.active ? '' : <span className='text-xs text-red-500'>(inactive)</span>}</p>
+                            <p className="text-xs text-muted-foreground">Slug: {c.slug} • Products: {c.products?.length || 0}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline" onClick={async () => { if (!confirm('Delete combo?')) return; try { await combosAPI.delete(c._id); toast('Deleted'); loadCombos(); } catch (e:any) { toast(e.response?.data?.message || 'Delete failed'); } }}>Delete</Button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}

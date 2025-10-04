@@ -8,6 +8,7 @@ const adminProductsRouter = require("./routes/admin/products-routes");
 const adminOrderRouter = require("./routes/admin/order-routes");
 const adminCategoryRouter = require("./routes/admin/category-routes");
 const adminUserRouter = require("./routes/admin/user-routes");
+const adminComboRouter = require("./routes/admin/combo-routes");
 
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
@@ -91,6 +92,7 @@ app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/admin/orders", adminOrderRouter);
 app.use("/api/admin/categories", adminCategoryRouter);
 app.use("/api/admin/users", adminUserRouter);
+app.use("/api/admin/combos", adminComboRouter);
 
 app.use("/api/shop/products", shopProductsRouter);
 app.use("/api/shop/cart", shopCartRouter);
@@ -100,5 +102,9 @@ app.use("/api/shop/search", shopSearchRouter);
 app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
+
+// Public combos (active only)
+const { listActiveCombos } = require('./controllers/admin/combo-controller');
+app.get('/api/shop/combos/get', listActiveCombos);
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));

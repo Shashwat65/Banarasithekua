@@ -119,4 +119,13 @@ export const adminAPI = {
   createAdmin: (data: any) => api.post('/admin/users/bootstrap', data),
 };
 
+// Combos API
+export const combosAPI = {
+  getAllPublic: () => api.get('/shop/combos/get'),
+  getAllAdmin: () => api.get('/admin/combos/get'),
+  create: (data: any) => api.post('/admin/combos/add', data),
+  update: (id: string, data: any) => api.put(`/admin/combos/edit/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/combos/delete/${id}`),
+};
+
 export default api;
