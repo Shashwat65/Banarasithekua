@@ -19,6 +19,14 @@ import Products from "@/pages/Products";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import ReturnsAndShipping from "@/pages/ReturnsAndShipping";
+import FAQ from "@/pages/FAQ";
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
+import RefundPolicy from "@/pages/RefundPolicy";
+import ShippingPolicy from "@/pages/ShippingPolicy";
+import CancellationPolicy from "@/pages/CancellationPolicy";
+import CookiePolicy from "@/pages/CookiePolicy";
+import Disclaimer from "@/pages/Disclaimer";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +96,14 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/returns-and-shipping" element={<ReturnsAndShipping />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/shipping-policy" element={<ShippingPolicy />} />
+              <Route path="/cancellation-policy" element={<CancellationPolicy />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </HashRouter>

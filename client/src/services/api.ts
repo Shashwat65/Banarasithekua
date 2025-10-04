@@ -22,14 +22,31 @@ api.interceptors.response.use(
       if (url?.includes('/auth/check-auth')) {
         return Promise.reject(error);
       }
-      const publicPaths = ['/', '/products', '/privacy', '/terms', '/returns-and-shipping'];
-      const current = window.location.pathname;
+      // Support HashRouter: derive route from hash if present
+      const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+      const current = hash || window.location.pathname;
+      const currentPath = current.replace(/\?.*$/, '');
+      const publicPaths = [
+        '/',
+        '/products',
+        '/privacy',
+        '/terms',
+        '/returns-and-shipping',
+        '/refund-policy',
+        '/shipping-policy',
+        '/cancellation-policy',
+        '/cookie-policy',
+        '/disclaimer',
+        '/faq',
+        '/about',
+        '/contact'
+      ];
       if (publicPaths.includes(current) || current.startsWith('/products/')) {
         // allow staying on public pages
         return Promise.reject(error);
       }
       localStorage.removeItem('user');
-      if (!current.startsWith('/login')) {
+      if (!currentPath.startsWith('/login')) {
         window.location.href = '/login';
       }
     }
