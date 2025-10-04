@@ -9,6 +9,8 @@ const adminOrderRouter = require("./routes/admin/order-routes");
 const adminCategoryRouter = require("./routes/admin/category-routes");
 const adminUserRouter = require("./routes/admin/user-routes");
 const adminComboRouter = require("./routes/admin/combo-routes");
+const adminTeamRouter = require("./routes/admin/team-routes");
+const adminComboRouter = require("./routes/admin/combo-routes");
 
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
@@ -92,6 +94,8 @@ app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/admin/orders", adminOrderRouter);
 app.use("/api/admin/categories", adminCategoryRouter);
 app.use("/api/admin/users", adminUserRouter);
+app.use("/api/admin/combos", adminComboRouter);
+app.use("/api/admin/team", adminTeamRouter);
 app.use("/api/admin/combos", adminComboRouter);
 
 app.use("/api/shop/products", shopProductsRouter);

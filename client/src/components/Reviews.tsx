@@ -31,22 +31,15 @@ const reviewGallery = [
   },
 ];
 
-const team = [
-  {
-    name: 'Shashwat Singh',
-    role: 'Founder & Recipe Lead',
-    img: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=320&q=80'
-  },
-  {
-    name: 'Anjali Verma',
-    role: 'Quality & Hygiene',
-    img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=320&q=80'
-  },
-  {
-    name: 'Rahul Kumar',
-    role: 'Operations & Dispatch',
-    img: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=320&q=80'
-  },
+import { useEffect, useState } from 'react';
+import { teamAPI } from '@/services/api';
+
+interface TeamMember { _id: string; name: string; role: string; photo?: string; active?: boolean; }
+
+const fallbackTeam: TeamMember[] = [
+  { _id: 'f1', name: 'Shashwat Singh', role: 'Founder & Recipe Lead', photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=320&q=80' },
+  { _id: 'f2', name: 'Anjali Verma', role: 'Quality & Hygiene', photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=320&q=80' },
+  { _id: 'f3', name: 'Rahul Kumar', role: 'Operations & Dispatch', photo: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=320&q=80' },
 ];
 
 const Reviews = () => {
@@ -97,7 +90,28 @@ const Reviews = () => {
         </div>
 
         {/* Team Section */}
-        <div className="space-y-12" id="team">
+        <TeamSection />
+      </div>
+    </section>
+  );
+};
+
+const TeamSection = () => {
+  const [team, setTeam] = useState<TeamMember[]>(fallbackTeam);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await teamAPI.getAll();
+        if (Array.isArray(res.data.data) && res.data.data.length) {
+          setTeam(res.data.data.filter((m: TeamMember) => m.active !== false));
+        }
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+  return (
+    <div className="space-y-12" id="team">
           <div className="text-center max-w-2xl mx-auto space-y-4">
             <p className="text-[10px] sm:text-xs uppercase tracking-[0.6em] text-secondary/50">Our Team</p>
             <h3 className="text-3xl sm:text-4xl font-semibold text-secondary">People Behind The Craft</h3>
@@ -105,9 +119,9 @@ const Reviews = () => {
           </div>
           <div className="grid gap-10 sm:grid-cols-3">
             {team.map(member => (
-              <div key={member.name} className="group relative overflow-hidden rounded-[28px] border border-border/60 bg-white shadow-[0_24px_40px_rgba(84,48,33,0.12)]">
+              <div key={member._id} className="group relative overflow-hidden rounded-[28px] border border-border/60 bg-white shadow-[0_24px_40px_rgba(84,48,33,0.12)]">
                 <div className="h-72">
-                  <img src={member.img} alt={member.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={member.photo || 'https://placehold.co/400x600?text=Team'} alt={member.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
                 <div className="p-5 space-y-1">
                   <p className="font-semibold text-secondary">{member.name}</p>
@@ -116,9 +130,7 @@ const Reviews = () => {
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 };
 

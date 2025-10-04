@@ -2,6 +2,7 @@ import AnnouncementBanner from "@/components/AnnouncementBanner";
 import Header from "@/components/Header";
 import HeroCarousel from "@/components/HeroCarousel";
 import ProductGrid from "@/components/ProductGrid";
+import ComboGrid from "@/components/ComboGrid";
 import Reviews from "@/components/Reviews";
 import CoreValues from "@/components/CoreValues";
 import Story from "@/components/Story";
@@ -35,6 +36,9 @@ const Index = () => {
       </section>
       <section id="products">
         <ProductGrid />
+      </section>
+      <section id="combo-products">
+        <ComboGrid />
       </section>
       <section id="reviews">
         <Reviews />

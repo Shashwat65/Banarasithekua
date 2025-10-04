@@ -119,13 +119,22 @@ export const adminAPI = {
   createAdmin: (data: any) => api.post('/admin/users/bootstrap', data),
 };
 
-// Combos API
+// Combos API (admin + public helpers)
 export const combosAPI = {
-  getAllPublic: () => api.get('/shop/combos/get'),
+  getAllPublic: () => api.get('/admin/combos/get'), // could be moved to public route later
   getAllAdmin: () => api.get('/admin/combos/get'),
   create: (data: any) => api.post('/admin/combos/add', data),
   update: (id: string, data: any) => api.put(`/admin/combos/edit/${id}`, data),
   delete: (id: string) => api.delete(`/admin/combos/delete/${id}`),
 };
+
+// Team API
+export const teamAPI = {
+  getAll: () => api.get('/admin/team/get'),
+  create: (data: any) => api.post('/admin/team/add', data),
+  update: (id: string, data: any) => api.put(`/admin/team/edit/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/team/delete/${id}`),
+};
+
 
 export default api;
