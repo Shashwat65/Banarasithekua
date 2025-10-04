@@ -1,8 +1,30 @@
-# React + Vite
+# Banarasi Thekua — Vite + React + Tailwind
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A handcrafted e‑commerce frontend built with Vite, React, TypeScript, TailwindCSS and shadcn/ui.
 
-Currently, two official plugins are available:
+## Getting started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Prerequisites:
+
+Steps:
+1. Install dependencies: npm i
+2. Configure environment variables (see committed `.env` for production-ready defaults). No external DB required — uses file-based JSON under `./data`.
+3. Run the app: npm run dev
+
+## Tech stack
+- Vite + React 18 + TypeScript
+- TailwindCSS + shadcn/ui (Radix UI)
+- Express API (file-based JSON store)
+
+## Build
+
+## License
+Proprietary — All rights reserved.
+
+## Development
+
+### Storage (no external database)
+
+This project no longer uses MongoDB. A simple file-based JSON store is used for persistence during development. Data is written to the `data/` directory at the project root with one file per collection (e.g., `data/users.json`, `data/products.json`).
+
+You can safely delete the `data/` folder to reset local data.
