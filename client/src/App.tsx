@@ -67,14 +67,7 @@ const App = () => (
               />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:slug" element={<ProductDetail />} />
-              <Route
-                path="/cart"
-                element={
-                  <RequireAuth>
-                    <Cart />
-                  </RequireAuth>
-                }
-              />
+              <Route path="/cart" element={<Cart />} />
               <Route
                 path="/checkout"
                 element={

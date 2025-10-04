@@ -143,6 +143,16 @@ export default function ProductDetail() {
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-6 py-16 grid gap-12 lg:grid-cols-2">
+        <div className="lg:col-span-2 mb-4 flex justify-between items-center">
+          <Button
+            variant="ghost"
+            className="px-3"
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/products"))}
+          >
+            ← Back
+          </Button>
+          <Link to="/cart" className="text-sm underline text-secondary/70 hover:text-secondary">View Cart</Link>
+        </div>
         <div className="relative">
           {product.image ? (
             <img

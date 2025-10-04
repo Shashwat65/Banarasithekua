@@ -22,13 +22,15 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-const NAV_LINKS = [
-  { label: "Home", href: "#hero" },
-  { label: "Shop", href: "#products" },
-  { label: "Reviews", href: "#reviews" },
-  { label: "Values", href: "#values" },
-  { label: "Story", href: "#story" },
-  { label: "Contact", href: "#footer" },
+// In a HashRouter, raw anchor hashes (e.g. #hero) conflict with route resolution.
+// We therefore treat these as logical section IDs and perform a programmatic scroll.
+const NAV_LINKS: { label: string; section: string }[] = [
+  { label: "Home", section: "hero" },
+  { label: "Shop", section: "products" },
+  { label: "Reviews", section: "reviews" },
+  { label: "Values", section: "values" },
+  { label: "Story", section: "story" },
+  { label: "Contact", section: "footer" },
 ];
 
 const Header = () => {
@@ -223,6 +225,22 @@ const Header = () => {
     </div>
   );
 
+  const scrollToSection = (sectionId: string) => {
+    const doScroll = () => {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
+    if (location.pathname !== "/") {
+      // Navigate home, then scroll after mount
+      navigate("/", { state: { scrollTarget: sectionId } });
+    } else {
+      // Already on home; slight delay to allow layout
+      requestAnimationFrame(doScroll);
+    }
+  };
+
   return (
     <header className="border-b border-border/70 bg-background/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 sm:px-6">
@@ -243,11 +261,15 @@ const Header = () => {
                     Heritage mithai handcrafted daily in Maruti Nagar, Varanasi.
                   </p>
                 </SheetHeader>
-                <nav className="mt-6 flex flex-col gap-3 text-secondary/80 text-sm">
+                <nav className="mt-6 flex flex-col gap-1 text-secondary/80 text-sm">
                   {NAV_LINKS.map((item) => (
-                    <a key={item.href} href={item.href} className="rounded-lg px-3 py-2 hover:bg-secondary/10 transition">
+                    <button
+                      key={item.section}
+                      onClick={() => scrollToSection(item.section)}
+                      className="text-left rounded-lg px-3 py-2 hover:bg-secondary/10 transition focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
                       {item.label}
-                    </a>
+                    </button>
                   ))}
                 </nav>
                 <div className="mt-8 grid gap-3 text-sm">
@@ -301,9 +323,13 @@ const Header = () => {
 
           <nav className="hidden lg:flex items-center text-sm font-medium tracking-wide text-secondary/75 gap-8 xl:gap-10">
             {NAV_LINKS.map((item) => (
-              <a key={item.href} href={item.href} className="relative transition hover:text-secondary">
+              <button
+                key={item.section}
+                onClick={() => scrollToSection(item.section)}
+                className="relative transition hover:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-md px-1"
+              >
                 {item.label}
-              </a>
+              </button>
             ))}
           </nav>
 

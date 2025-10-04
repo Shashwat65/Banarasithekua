@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ordersAPI } from "@/services/api";
 
@@ -14,6 +14,7 @@ type Order = {
 
 export default function TrackOrder() {
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,9 +83,20 @@ export default function TrackOrder() {
 
   return (
     <div className="container mx-auto px-6 py-16 space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold">Track Order</h1>
-        <p className="text-secondary/70">Order ID: {order.id}</p>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
+              className="text-sm px-3 py-1 rounded-md border border-border/60 hover:bg-muted"
+            >
+              ← Back
+            </button>
+            <h1 className="text-3xl font-semibold">Track Order</h1>
+          </div>
+          <p className="text-secondary/70">Order ID: {order.id}</p>
+        </div>
+        <Link to="/" className="text-sm underline text-secondary/70 hover:text-secondary">Home</Link>
       </div>
 
       <Card>

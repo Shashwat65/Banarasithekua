@@ -14,10 +14,23 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("user");
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
+    const status = error.response?.status;
+    const url: string | undefined = error.config?.url;
+    const skip = error.config?.headers?.['x-no-redirect-on-401'];
+    if (status === 401 && !skip) {
+      // Don't redirect for passive auth probe
+      if (url?.includes('/auth/check-auth')) {
+        return Promise.reject(error);
+      }
+      const publicPaths = ['/', '/products', '/privacy', '/terms', '/returns-and-shipping'];
+      const current = window.location.pathname;
+      if (publicPaths.includes(current) || current.startsWith('/products/')) {
+        // allow staying on public pages
+        return Promise.reject(error);
+      }
+      localStorage.removeItem('user');
+      if (!current.startsWith('/login')) {
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);

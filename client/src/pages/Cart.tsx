@@ -20,7 +20,19 @@ export default function Cart() {
 
   return (
     <div className="container mx-auto px-6 py-16">
-      <h1 className="text-3xl font-semibold mb-8">Cart ({totalItems})</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/products"))}
+          >
+            ← Back
+          </Button>
+          <h1 className="text-3xl font-semibold">Cart ({totalItems})</h1>
+        </div>
+        <Link to="/products" className="text-sm underline text-secondary/70 hover:text-secondary">Continue Shopping</Link>
+      </div>
       <div className="grid md:grid-cols-[2fr,1fr] gap-10">
         <div className="space-y-6">
           {items.map((item) => (

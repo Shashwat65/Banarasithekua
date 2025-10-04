@@ -72,6 +72,9 @@ export default function Signup() {
         <div className="text-sm text-muted-foreground">
           Have an account? <Link to="/login" className="underline">Login</Link>
         </div>
+        <div className="pt-2 text-center">
+          <Link to="/" className="text-xs text-secondary/60 hover:text-secondary underline">← Back to home</Link>
+        </div>
       </form>
     </div>
   );

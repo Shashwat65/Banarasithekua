@@ -34,6 +34,9 @@ export default function Login() {
         <Input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
         <Button disabled={loading} type="submit" className="w-full">{loading ? "Logging in…" : "Login"}</Button>
         <div className="text-sm text-muted-foreground">No account? <Link to="/signup" className="underline">Sign up</Link></div>
+        <div className="pt-2 text-center">
+          <Link to="/" className="text-xs text-secondary/60 hover:text-secondary underline">← Back to home</Link>
+        </div>
       </form>
     </div>
   );
