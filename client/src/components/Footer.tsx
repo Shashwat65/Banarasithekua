@@ -72,15 +72,10 @@ const Footer = () => {
           <div className="lg:col-span-3 space-y-4">
             <h5 className="text-sm font-semibold uppercase tracking-[0.35em] text-[#f6f1e9]/60">Policies</h5>
             <ul className="space-y-3 text-sm text-[#f6f1e9]/70">
-              <li><Link to="/privacy" className="hover:text-[#f6f1e9] transition">Privacy Policy</Link></li>
               <li><Link to="/terms" className="hover:text-[#f6f1e9] transition">Terms &amp; Conditions</Link></li>
-              <li><Link to="/returns-and-shipping" className="hover:text-[#f6f1e9] transition">Returns &amp; Shipping</Link></li>
-              <li><Link to="/refund-policy" className="hover:text-[#f6f1e9] transition">Refund Policy</Link></li>
+              <li><Link to="/privacy" className="hover:text-[#f6f1e9] transition">Privacy Policy</Link></li>
+              <li><Link to="/returns-and-shipping" className="hover:text-[#f6f1e9] transition">Refund, Return &amp; Shipping</Link></li>
               <li><Link to="/shipping-policy" className="hover:text-[#f6f1e9] transition">Shipping Policy</Link></li>
-              <li><Link to="/cancellation-policy" className="hover:text-[#f6f1e9] transition">Cancellation Policy</Link></li>
-              <li><Link to="/cookie-policy" className="hover:text-[#f6f1e9] transition">Cookie Policy</Link></li>
-              <li><Link to="/disclaimer" className="hover:text-[#f6f1e9] transition">Disclaimer</Link></li>
-              <li><Link to="/faq" className="hover:text-[#f6f1e9] transition">FAQ</Link></li>
             </ul>
           </div>
 

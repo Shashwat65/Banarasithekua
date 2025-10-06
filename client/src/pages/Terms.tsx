@@ -13,81 +13,51 @@ const Terms = () => {
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">Terms &amp; Conditions</h1>
           <p className="text-muted-foreground">
-            These Terms &amp; Conditions govern your access to and purchases from Banarasi Thekua and our
-            website at <span className="font-medium">banarasithekua.com</span>. By shopping with us you agree to the
-            policies set out below.
+            Welcome to <span className="font-medium">banarasithekua.com</span> (the “Site”). These Terms &amp; Conditions form a
+            binding agreement between you and Banarasi Thekua ("we", "our"). By browsing, creating an account, or
+            purchasing from us you accept these terms.
           </p>
         </div>
 
         <section className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold">1. Acceptance of Terms</h2>
-            <p className="text-muted-foreground">
-              When you browse, place an order, or otherwise engage with Banarasi Thekua, you confirm that you have
-              read, understood, and agreed to these Terms &amp; Conditions. If you do not agree, please refrain from
-              using the website or placing an order.
-            </p>
+            <p className="text-muted-foreground">Using the Site or placing an order means you agree to be bound by these Terms. If you disagree with any part, please discontinue use.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">2. Product Information</h2>
-            <p className="text-muted-foreground">
-              Every batch of our artisanal thekua is handcrafted in Varanasi. We photograph and describe products with
-              care, but natural ingredients and lighting conditions may result in slight differences in colour or
-              appearance from what you see on screen.
-            </p>
+            <p className="text-muted-foreground">We hand‑craft small batches in Varanasi. Natural colour / texture variation is normal. Images &amp; descriptions are illustrative and not a guarantee of identical appearance.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">3. Pricing &amp; Payment</h2>
-            <p className="text-muted-foreground">
-              All prices are listed in Indian Rupees (INR) and include applicable taxes. You can pay securely via
-              credit or debit cards, UPI, and net banking through our trusted payment partners. We reserve the right to
-              update prices without prior notice, but confirmed orders will always honour the price you paid.
-            </p>
+            <p className="text-muted-foreground">Prices are shown in INR inclusive of applicable taxes. We accept UPI, cards and net‑banking through secure gateways. Prices may change without notice; confirmed orders retain their paid price.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">4. Order Confirmation</h2>
-            <p className="text-muted-foreground">
-              After you place an order, you&apos;ll receive an email confirmation from <span className="font-medium">hello@banarasithekua.com</span>.
-              Orders are accepted subject to availability. If an item is unavailable or we’re unable to fulfil your
-              order, we’ll notify you promptly and arrange an alternative or a full refund.
-            </p>
+            <p className="text-muted-foreground">You’ll receive an email / SMS after checkout. Orders remain subject to stock &amp; quality checks. If we cannot fulfil, we refund or propose an alternative.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">5. Shipping &amp; Delivery</h2>
-            <p className="text-muted-foreground">
-              We currently ship across India. Shipping charges and delivery timelines are calculated at checkout based on
-              your location and chosen service. Dispatch times may vary during festivals, peak seasons, or due to factors
-              outside our control.
-            </p>
+            <p className="text-muted-foreground">Nationwide shipping. Estimated timelines &amp; charges display at checkout. Festive peaks or courier disruptions may extend delivery windows.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">6. Intellectual Property</h2>
-            <p className="text-muted-foreground">
-              All photographs, text, illustrations, and branding elements on Banarasi Thekua are owned by us and
-              protected under Indian copyright laws. Please request written permission before using any of our content.
-            </p>
+            <p className="text-muted-foreground">All content (text, images, marks) is © Banarasi Thekua. Do not reuse without written consent.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">7. Limitation of Liability</h2>
-            <p className="text-muted-foreground">
-              To the fullest extent permitted by law, Banarasi Thekua is not liable for any indirect, incidental, or
-              consequential damages arising from the use of our website, products, or services. Our liability is limited
-              to the amount you paid for the specific order in question.
-            </p>
+            <p className="text-muted-foreground">Our total liability for any claim is capped at the order value paid. We are not liable for indirect or consequential losses.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">8. Governing Law</h2>
-            <p className="text-muted-foreground">
-              These Terms &amp; Conditions are governed by the laws of India. Any disputes will fall under the exclusive
-              jurisdiction of the courts in Varanasi, Uttar Pradesh.
-            </p>
+            <p className="text-muted-foreground">These Terms are governed by Indian law; courts of Varanasi, Uttar Pradesh have exclusive jurisdiction.</p>
           </div>
         </section>
 

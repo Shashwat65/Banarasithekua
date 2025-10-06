@@ -22,12 +22,9 @@ import ReturnsAndShipping from "@/pages/ReturnsAndShipping";
 import FAQ from "@/pages/FAQ";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
-import RefundPolicy from "@/pages/RefundPolicy";
 import ShippingPolicy from "@/pages/ShippingPolicy";
-import CancellationPolicy from "@/pages/CancellationPolicy";
-import CookiePolicy from "@/pages/CookiePolicy";
-import Disclaimer from "@/pages/Disclaimer";
 import WhatsappFloat from "@/components/WhatsappFloat";
+import Layout from "@/components/Layout";
 
 const queryClient = new QueryClient();
 
@@ -63,9 +60,9 @@ const App = () => (
         <CartProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+              <Route path="/" element={<Layout><Index /></Layout>} />
+              <Route path="/login" element={<Layout><Login /></Layout>} />
+              <Route path="/signup" element={<Layout><Signup /></Layout>} />
               <Route
                 path="/admin"
                 element={
@@ -74,14 +71,14 @@ const App = () => (
                   </RequireAdmin>
                 }
               />
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/:slug" element={<ProductDetail />} />
-              <Route path="/cart" element={<Cart />} />
+              <Route path="/products" element={<Layout><Products /></Layout>} />
+              <Route path="/products/:slug" element={<Layout><ProductDetail /></Layout>} />
+              <Route path="/cart" element={<Layout><Cart /></Layout>} />
               <Route
                 path="/checkout"
                 element={
                   <RequireAuth>
-                    <Checkout />
+                    <Layout><Checkout /></Layout>
                   </RequireAuth>
                 }
               />
@@ -89,23 +86,19 @@ const App = () => (
                 path="/order-confirmation/:orderId"
                 element={
                   <RequireAuth>
-                    <OrderConfirmation />
+                    <Layout><OrderConfirmation /></Layout>
                   </RequireAuth>
                 }
               />
-              <Route path="/track-order/:orderId" element={<TrackOrder />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/returns-and-shipping" element={<ReturnsAndShipping />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              <Route path="/shipping-policy" element={<ShippingPolicy />} />
-              <Route path="/cancellation-policy" element={<CancellationPolicy />} />
-              <Route path="/cookie-policy" element={<CookiePolicy />} />
-              <Route path="/disclaimer" element={<Disclaimer />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/track-order/:orderId" element={<Layout><TrackOrder /></Layout>} />
+              <Route path="/terms" element={<Layout><Terms /></Layout>} />
+              <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
+              <Route path="/returns-and-shipping" element={<Layout><ReturnsAndShipping /></Layout>} />
+              <Route path="/shipping-policy" element={<Layout><ShippingPolicy /></Layout>} />
+              <Route path="/about" element={<Layout><About /></Layout>} />
+              <Route path="/contact" element={<Layout><Contact /></Layout>} />
+              <Route path="/faq" element={<Layout><FAQ /></Layout>} />
+              <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
             <WhatsappFloat />
           </BrowserRouter>
