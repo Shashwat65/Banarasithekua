@@ -26,6 +26,7 @@ import Contact from "@/pages/Contact";
 import ShippingPolicy from "@/pages/ShippingPolicy";
 import WhatsappFloat from "@/components/WhatsappFloat";
 import Layout from "@/components/Layout";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Layout><Index /></Layout>} />
               <Route path="/login" element={<Layout><Login /></Layout>} />
