@@ -197,10 +197,16 @@ export default function ProductDetail() {
                 {product.weight}
               </p>
             ) : null}
-            {product.stock <= 0 ? (
-              <p className="text-sm text-red-500">Currently sold out — join waitlist.</p>
+            {typeof product.stock === 'number' ? (
+              product.stock <= 0 ? (
+                <p className="text-sm text-red-500">Currently sold out — join waitlist.</p>
+              ) : (
+                <p className="text-sm text-secondary/70">
+                  {product.stock > 20 ? 'In stock' : product.stock <= 5 ? `Only ${product.stock} left` : `${product.stock} in stock`} — ships within 48 hours.
+                </p>
+              )
             ) : (
-              <p className="text-sm text-secondary/60">In stock — ships within 48 hours.</p>
+              <p className="text-sm text-secondary/70">Freshly prepared to order — ships within 48 hours.</p>
             )}
           </div>
 

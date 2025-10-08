@@ -308,13 +308,15 @@ const Header = () => {
               </SheetContent>
             </Sheet>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              <img src={ganeshaMark} alt="Banarasi Thekua" className="w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11" />
-              <div className="leading-tight">
-                <span className="block text-[8px] sm:text-[9px] md:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] md:tracking-[0.4em] text-accent font-semibold">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex-shrink-0 flex items-center justify-center">
+                <img src={ganeshaMark} alt="Banarasi Thekua" className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14" />
+              </div>
+              <div className="flex flex-col justify-center min-w-0">
+                <span className="block text-[9px] sm:text-[10px] md:text-[11px] uppercase tracking-[0.25em] sm:tracking-[0.32em] md:tracking-[0.45em] text-accent font-semibold whitespace-nowrap">
                   Banarasi Thekua
                 </span>
-                <span className="block text-sm sm:text-lg md:text-xl lg:text-[22px] font-serif font-semibold text-secondary">
+                <span className="block text-base sm:text-lg md:text-xl lg:text-[22px] font-serif font-semibold text-secondary whitespace-nowrap">
                   Heritage Mithai Atelier
                 </span>
               </div>

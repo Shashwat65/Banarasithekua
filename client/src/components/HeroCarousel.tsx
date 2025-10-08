@@ -133,11 +133,18 @@ const HeroCarousel = () => {
               <p className="text-base sm:text-lg text-secondary/80 max-w-xl text-pretty">
                 {slide.copy}
               </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-4 text-sm sm:text-base font-semibold rounded-full shadow-xl shadow-primary/30">
+              {/* Static (non-clickable) CTA presentation: removed button interactivity per request */}
+              <div className="flex flex-wrap items-center gap-4 select-none">
+                <div
+                  className="px-6 py-4 text-sm sm:text-base font-semibold rounded-full shadow-xl shadow-primary/20 bg-primary text-primary-foreground pointer-events-none cursor-default"
+                  aria-hidden="true"
+                >
                   {slide.cta}
-                </Button>
-                <div className="px-4 py-2 rounded-full border border-primary/40 bg-white/70 text-[10px] sm:text-xs uppercase tracking-[0.3em] text-secondary font-medium">
+                </div>
+                <div
+                  className="px-4 py-2 rounded-full border border-primary/30 bg-white/60 text-[10px] sm:text-xs uppercase tracking-[0.3em] text-secondary font-medium pointer-events-none cursor-default"
+                  aria-hidden="true"
+                >
                   Use Code {slide.code}
                 </div>
               </div>
