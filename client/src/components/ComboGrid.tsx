@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { combosAPI } from '@/services/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import ProductCard from '@/components/ProductCard';
 
 interface Combo {
   _id: string;
@@ -47,34 +45,22 @@ const ComboGrid = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {combos.map((combo, idx) => {
-            const onSale = combo.originalPrice && combo.price && combo.originalPrice > combo.price;
             const img = combo.image || fallbackImages[idx % fallbackImages.length];
             return (
-              <Link key={combo._id} to={`/products/${combo.slug}`} className="block focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-xl">
-                <Card className="group overflow-hidden border-border/60 h-full">
-                  {img && (
-                    <div className="relative overflow-hidden">
-                      <img src={img} alt={combo.name} className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]" />
-                      {onSale && (
-                        <span className="absolute top-3 left-3 text-[10px] font-semibold bg-accent text-accent-foreground px-2 py-1 rounded-full tracking-wide shadow">SAVE {Math.round(((combo.originalPrice!-combo.price!)/combo.originalPrice!)*100)}%</span>
-                      )}
-                    </div>
-                  )}
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center justify-between text-base">
-                      <span className="line-clamp-1">{combo.name}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4 pt-0">
-                    {combo.description && <p className="text-sm text-secondary/70 line-clamp-2 min-h-[2.5rem]">{combo.description}</p>}
-                    <div className="flex items-baseline gap-3">
-                      {combo.price !== undefined && <span className="text-lg font-semibold">₹{combo.price.toFixed(2)}</span>}
-                      {onSale && <span className="text-sm line-through text-secondary/40">₹{combo.originalPrice?.toFixed(2)}</span>}
-                    </div>
-                    <Button size="sm" className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 w-full">View Options</Button>
-                  </CardContent>
-                </Card>
-              </Link>
+              <div key={combo._id}>
+                <ProductCard
+                  id={combo._id}
+                  name={combo.name}
+                  image={img}
+                  price={typeof combo.price === 'number' ? combo.price : (combo.price ? Number(combo.price) : 0)}
+                  originalPrice={combo.originalPrice ? Number(combo.originalPrice) : undefined}
+                  isOnSale={Boolean(combo.originalPrice && combo.price && combo.originalPrice > combo.price)}
+                  isSoldOut={false}
+                  description={combo.description}
+                  slug={combo.slug}
+                  category="Combo"
+                />
+              </div>
             );
           })}
         </div>
