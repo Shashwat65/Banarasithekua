@@ -1,18 +1,10 @@
+import teamPhoto from '@/assets/team-member.jpg';
+
 const reviewGallery = [
   {
     src: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=320&q=80",
     name: "Ritika & Aman",
     city: "Pune",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1542293787938-4d2226c12e77?auto=format&fit=crop&w=320&q=80",
-    name: "Kavya",
-    city: "Delhi NCR",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1530023367847-a683933f4175?auto=format&fit=crop&w=320&q=80",
-    name: "The Goyal Family",
-    city: "Lucknow",
   },
   {
     src: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?auto=format&fit=crop&w=320&q=80",
@@ -38,7 +30,7 @@ interface TeamMember { _id: string; name: string; role: string; photo?: string; 
 
 // Single current team member (as requested)
 const fallbackTeam: TeamMember[] = [
-  { _id: 'chinmay', name: 'Chinmay Pandey', role: 'Founder & Recipe Lead', photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=320&q=80' },
+  { _id: 'chinmay', name: 'Chinmay Pandey', role: 'Founder & Recipe Lead', photo: teamPhoto },
 ];
 
 const Reviews = () => {
