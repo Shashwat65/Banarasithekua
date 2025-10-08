@@ -32,14 +32,34 @@ const Story = () => {
           </div>
 
           <div className="relative">
-            <div className="rounded-[36px] border-2 border-dashed border-secondary/30 bg-white/80 h-full min-h-[420px] flex flex-col items-center justify-center text-secondary/40 text-center px-10 py-16">
-              <p className="text-sm uppercase tracking-[0.55em]">Brand Chronicle</p>
-              <h3 className="mt-6 text-2xl sm:text-3xl font-semibold text-secondary/60">
-                Reserved For Your Storytelling Canvas
-              </h3>
-              <p className="mt-4 text-sm sm:text-base text-secondary/50 max-w-xl">
-                Use this generous space for timelines, founders&apos; portraits, or a manifesto. The airy layout mirrors the original design with breathing room for rich brand copy.
+            <div className="rounded-[28px] border border-secondary/10 bg-white/90 h-full min-h-[420px] p-8 shadow-sm">
+              <p className="text-sm uppercase tracking-[0.55em] text-secondary/50">Brand Chronicle</p>
+              <h3 className="mt-4 text-2xl sm:text-3xl font-serif font-semibold text-secondary">Our Story & Craft</h3>
+              <p className="mt-4 text-sm sm:text-base text-secondary/70 max-w-xl">
+                Banarasi Thekua began as a small family kitchen in Maruti Nagar. Guided by a decades‑old recipe, we set out to preserve the authentic texture and warm, caramelised flavour of thekua while bringing modern food safety and consistent batches to every table.
               </p>
+
+              <div className="mt-6 grid gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium">1998</div>
+                  <div className="text-sm text-secondary/70">
+                    Roots: a grandmother’s time-tested thekua recipe became a family tradition.
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium">2018</div>
+                  <div className="text-sm text-secondary/70">Micro‑batch production &amp; hygienic packing introduced for consistent quality.</div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium">2024</div>
+                  <div className="text-sm text-secondary/70">Pan‑India dispatch and curated gift hampers launched—perfect for celebrations.</div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center gap-4">
+                <a href="/about" className="inline-block rounded-full bg-primary text-primary-foreground px-5 py-3 text-sm font-semibold shadow hover:bg-primary/95">Learn more about our journey</a>
+                <span className="text-sm text-secondary/60">• Crafted with traceable ingredients &amp; pure ghee</span>
+              </div>
             </div>
           </div>
         </div>
