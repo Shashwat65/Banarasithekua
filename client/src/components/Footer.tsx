@@ -38,7 +38,7 @@ const Footer = () => {
                 <Facebook className="h-5 w-5" />
               </a>
               <a
-                href="mailto:hello@banarasithekua.com"
+                href="mailto:info@banarasithekua.com"
                 aria-label="Email"
                 className="hover:text-[#f6f1e9] transition"
               >
@@ -83,7 +83,7 @@ const Footer = () => {
             <div className="space-y-3 text-sm text-[#f6f1e9]/70">
               <p>📍 Maruti Nagar Colony, Samneghat, Varanasi</p>
               <p>• Landmark: Beside Kidzee School, Maruti Nagar</p>
-              <p>✉️ hello@banarasithekua.com</p>
+              <p>✉️ info@banarasithekua.com</p>
               <p>📞 +91 99811 55442</p>
               <p className="text-xs text-[#f6f1e9]/40">Customer Care: Mon–Sat, 9 AM – 8 PM IST</p>
             </div>

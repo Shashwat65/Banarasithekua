@@ -43,14 +43,14 @@ const Privacy = () => {
 
           <div>
             <h2 className="text-xl font-semibold">6. Your Rights</h2>
-            <p className="text-muted-foreground">Request access, correction or deletion via <a href="mailto:hello@banarasithekua.com" className="underline">hello@banarasithekua.com</a>. We respond within reasonable time.</p>
+            <p className="text-muted-foreground">Request access, correction or deletion via <a href="mailto:info@banarasithekua.com" className="underline">info@banarasithekua.com</a>. We respond within reasonable time.</p>
           </div>
         </section>
 
         <div className="rounded-lg bg-card p-6 text-sm text-muted-foreground shadow-sm">
           <p className="font-medium text-foreground">Questions about your privacy?</p>
           <p>
-            Email <a href="mailto:hello@banarasithekua.com" className="underline">hello@banarasithekua.com</a> or call
+            Email <a href="mailto:info@banarasithekua.com" className="underline">info@banarasithekua.com</a> or call
             {" "}
             <a href="tel:+919981155442" className="underline">+91 99811 55442</a>.
           </p>
