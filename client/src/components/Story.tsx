@@ -57,7 +57,6 @@ const Story = () => {
               </div>
 
               <div className="mt-6 flex items-center gap-4">
-                <a href="/about" className="inline-block rounded-full bg-primary text-primary-foreground px-5 py-3 text-sm font-semibold shadow hover:bg-primary/95">Learn more about our journey</a>
                 <span className="text-sm text-secondary/60">• Crafted with traceable ingredients &amp; pure ghee</span>
               </div>
             </div>
