@@ -1,6 +1,5 @@
 import HeroCarousel from "@/components/HeroCarousel";
 import ProductGrid from "@/components/ProductGrid";
-import ComboGrid from "@/components/ComboGrid";
 import Reviews from "@/components/Reviews";
 import CoreValues from "@/components/CoreValues";
 import Story from "@/components/Story";
@@ -32,9 +31,7 @@ const Index = () => {
       <section id="products">
         <ProductGrid />
       </section>
-      <section id="combo-products">
-        <ComboGrid />
-      </section>
+      {/* Combo section hidden for now */}
       <section id="reviews">
         <Reviews />
       </section>
