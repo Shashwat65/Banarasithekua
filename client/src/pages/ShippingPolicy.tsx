@@ -36,7 +36,7 @@ export default function ShippingPolicy() {
       </div>
       <div className="rounded-lg bg-card p-6 text-xs text-secondary/70 space-y-2">
         <p className="font-medium text-secondary">Need shipping support?</p>
-        <p>Email <a href="mailto:hello@banarasithekua.com" className="underline">hello@banarasithekua.com</a> or call <a href="tel:+919981155442" className="underline">+91 99811 55442</a>.</p>
+  <p>Email <a href="mailto:info@banarasithekua.com" className="underline">info@banarasithekua.com</a> or call <a href="tel:+919981155442" className="underline">+91 99811 55442</a>.</p>
       </div>
     </div>
   );

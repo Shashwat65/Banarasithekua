@@ -58,7 +58,7 @@ const ReturnsAndShipping = () => {
         <div className="rounded-lg bg-card p-6 text-sm text-muted-foreground shadow-sm">
           <p className="font-medium text-foreground">Support within reach</p>
           <p>
-            Write to <a href="mailto:hello@banarasithekua.com" className="underline">hello@banarasithekua.com</a> or call
+            Write to <a href="mailto:info@banarasithekua.com" className="underline">info@banarasithekua.com</a> or call
             {" "}
             <a href="tel:+919981155442" className="underline">+91 99811 55442</a> for any return or shipping query.
           </p>
