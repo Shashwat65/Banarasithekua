@@ -1,4 +1,4 @@
-dffdconst cloudinary = require("cloudinary").v2;
+const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 
 // Load credentials from environment (already loaded in server.js via dotenv)
