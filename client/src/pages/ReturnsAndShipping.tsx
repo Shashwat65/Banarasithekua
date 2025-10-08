@@ -23,12 +23,12 @@ const ReturnsAndShipping = () => {
 
           <div>
             <h2 className="text-xl font-semibold">2. Refund Process</h2>
-            <p className="text-muted-foreground">Approved refunds (after verification) reach your original payment method in 7–10 business days; bank posting times may vary.</p>
+            <p className="text-muted-foreground">Approved refund after verification will be credited to your account through original payment method within 7-10 business days.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">3. Exchange Policy</h2>
-            <p className="text-muted-foreground">If stock is available we dispatch exchange items within 3–5 business days; otherwise a refund is issued.</p>
+            <p className="text-muted-foreground">If the stock is available we will deliver the exchanged items within 3-5 business days.</p>
           </div>
         </section>
 

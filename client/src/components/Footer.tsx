@@ -61,7 +61,6 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-[#f6f1e9]/70">
               <li><a href="#hero" className="hover:text-[#f6f1e9] transition">Home</a></li>
               <li><a href="#products" className="hover:text-[#f6f1e9] transition">Shop</a></li>
-              <li><a href="/products#combos" className="hover:text-[#f6f1e9] transition">Combos</a></li>
               <li><a href="#team" className="hover:text-[#f6f1e9] transition">Team</a></li>
               <li><Link to="/about" className="hover:text-[#f6f1e9] transition">About Us</Link></li>
               <li><a href="#reviews" className="hover:text-[#f6f1e9] transition">Testimonials</a></li>
