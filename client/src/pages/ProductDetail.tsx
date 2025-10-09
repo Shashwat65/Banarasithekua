@@ -130,7 +130,12 @@ export default function ProductDetail() {
     },
     {
       label: "Pack Size",
-      value: product.weight || product.packSize || "400g family pack",
+      value: (() => {
+        const raw = product.weight || product.packSize || product.size;
+        const grams = /\b\d{2,4}\s?g\b/i;
+        if (!raw || String(raw).trim() === "") return "500g";
+        return grams.test(String(raw)) ? String(raw) : `${String(raw)} · 500g`;
+      })(),
     },
     {
       label: "Last updated",
