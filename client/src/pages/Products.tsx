@@ -81,10 +81,11 @@ export default function Products() {
               const id = product._id || product.id;
               const slug = product.slug || id;
               const image = product.image || product.images?.[0]?.url || null;
-              const categoryName =
+              const rawCategory =
                 typeof product.category === "object" && product.category !== null
                   ? product.category.name
                   : product.categoryName || product.category || null;
+              const categoryName = rawCategory && !/uncategor/i.test(String(rawCategory)) ? rawCategory : "Thekua";
               const salePrice = typeof product.salePrice === "number" ? product.salePrice : null;
               const basePrice = typeof product.price === "number" ? product.price : 0;
               const price = salePrice && salePrice > 0 ? salePrice : basePrice;
@@ -109,6 +110,7 @@ export default function Products() {
                   description={product.description || product.details}
                   weight={product.weight || product.packSize || product.size}
                   category={categoryName}
+                  stock={stock}
                 />
               );
             })}

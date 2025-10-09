@@ -113,7 +113,11 @@ export default function ProductDetail() {
   const detailPairs = [
     {
       label: "Category",
-      value: product.categoryName || product.category || "Uncategorised",
+      value: (() => {
+        const raw = product.categoryName || product.category;
+        if (!raw || /uncategor/i.test(String(raw))) return "Thekua";
+        return raw;
+      })(),
     },
     {
       label: "Availability",

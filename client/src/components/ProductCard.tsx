@@ -17,6 +17,7 @@ interface ProductCardProps {
   weight?: string | null;
   slug?: string | null;
   category?: string | null;
+  stock?: number | null | undefined;
 }
 
 const ProductCard = ({ 
@@ -31,6 +32,7 @@ const ProductCard = ({
   weight,
   slug,
   category,
+  stock,
 }: ProductCardProps) => {
   const { addItem } = useCart();
   const navigate = useNavigate();
@@ -94,7 +96,10 @@ const ProductCard = ({
       <div className="p-6 space-y-4">
         <header className="space-y-1">
           <p className="text-[11px] uppercase tracking-[0.45em] text-secondary/60">
-            {category ? `${category}`.toUpperCase() : "Banarasi Thekua Collection"}
+            {(() => {
+              const effective = category && !/uncategor/i.test(category) ? category : "Thekua";
+              return `${effective}`.toUpperCase();
+            })()}
           </p>
           <Link to={detailPath} className="font-semibold text-2xl text-secondary leading-tight hover:underline">
             {name}
@@ -122,10 +127,23 @@ const ProductCard = ({
           )}
         </div>
 
-        {/* Unit Price */}
-        <p className="text-xs text-secondary/60 uppercase tracking-[0.3em]">
-          Inclusive of all taxes
-        </p>
+        {/* Unit Price and Quantity */}
+        <div className="flex flex-col gap-1">
+          <p className="text-xs text-secondary/60 uppercase tracking-[0.3em]">Inclusive of all taxes</p>
+          {typeof stock === 'number' ? (
+            stock <= 0 ? (
+              <p className="text-xs text-red-500">Currently sold out</p>
+            ) : stock > 20 ? (
+              <p className="text-xs text-secondary/70">In stock</p>
+            ) : stock <= 5 ? (
+              <p className="text-xs text-amber-600">Only {stock} left</p>
+            ) : (
+              <p className="text-xs text-secondary/70">{stock} in stock</p>
+            )
+          ) : (
+            <p className="text-xs text-secondary/60">Freshly prepared to order</p>
+          )}
+        </div>
 
         {/* Action Button */}
         <div className="flex gap-3 pt-2">
