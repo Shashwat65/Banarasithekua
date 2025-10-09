@@ -120,11 +120,13 @@ const ProductCard = ({
               ₹{originalPrice.toFixed(0)}
             </span>
           )}
-          {weight && (
-            <span className="text-xs uppercase tracking-[0.35em] text-secondary/50">
-              {weight}
-            </span>
-          )}
+          <span className="text-xs uppercase tracking-[0.35em] text-secondary/50">
+            {(() => {
+              const grams = /\b\d{2,4}\s?g\b/i;
+              const w = weight || "500g";
+              return grams.test(String(w)) ? String(w) : `${String(w)} · 500g`;
+            })()}
+          </span>
         </div>
 
         {/* Unit Price and Quantity */}
