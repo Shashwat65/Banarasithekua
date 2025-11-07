@@ -1,7 +1,9 @@
 import api from './api';
 
+const SCRIPT_URL = import.meta.env.VITE_PHONEPE_CHECKOUT_JS || 'https://mercury-stg.phonepe.com/web/bundle/checkout.js';
+
 // Dynamically load PhonePe checkout script (idempotent)
-export function loadPhonePeScript(src: string = 'https://mercury.phonepe.com/web/bundle/checkout.js'): Promise<void> {
+export function loadPhonePeScript(src: string = SCRIPT_URL): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof window !== 'undefined' && (window as any).PhonePeCheckout) {
       return resolve();
