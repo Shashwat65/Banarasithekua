@@ -10,8 +10,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       "/api": {
-        target: process.env.VITE_API_PROXY || "http://localhost:5000",
+        target: process.env.VITE_API_URL?.replace('/api', '') || process.env.VITE_API_PROXY || "http://localhost:5000",
         changeOrigin: true,
+        rewrite: (path) => path,
       },
     },
   },
