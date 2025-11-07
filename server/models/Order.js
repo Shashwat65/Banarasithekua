@@ -32,6 +32,14 @@ const OrderSchema = new mongoose.Schema({
   // PhonePe fields
   merchantTransactionId: String,
   phonepeTransactionId: String,
+  // PhonePe Standard Checkout fields
+  merchantOrderId: String,
+  phonepeOrderId: String,
+  phonepeRedirectUrl: String,
+  phonepeState: String,
+  phonepeMetaInfo: Object,
+  phonepePaymentDetails: Array,
+  phonepeRefunds: Array,
 });
 
 module.exports = mongoose.model("Order", OrderSchema);

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
+import { loadPhonePeScript, initiatePayment, openPayPageIframe, checkStatus } from "@/services/phonepe";
 
 export default function Checkout() {
   const { items, subtotal, clear } = useCart();
@@ -35,25 +36,54 @@ export default function Checkout() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch("/api/orders", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
+    try {
+      // Ensure script is loaded
+      await loadPhonePeScript();
+      // Initiate payment session on backend (no UI change)
+      const payload = {
         items: items.map((item) => ({ ...item })),
         customer: form,
         amount: subtotal,
-        notes: form.notes,
-      }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      const data = await res.json();
-      toast("Order placed", { description: `Order ID: ${data.id}` });
-      clear();
-      navigate(`/order-confirmation/${data.id}`);
-    } else {
-      const err = await res.json().catch(() => ({}));
-      toast("Unable to place order", { description: err.error || "Please try again." });
+      };
+      const init = await initiatePayment(payload);
+      if (!init?.success) throw new Error("Failed to start payment");
+
+      // Open PayPage in IFRAME; when closed, reconcile status
+      openPayPageIframe(init.redirectUrl, async (result) => {
+        if (result === "USER_CANCEL") {
+          toast("Payment cancelled", { description: "You closed the payment window." });
+          setLoading(false);
+          return;
+        }
+        // CONCLUDED -> poll for terminal state
+        try {
+          let attempts = 0;
+          let finalState: string | undefined;
+          while (attempts < 20) { // ~progressive polling simplified
+            const s = await checkStatus(init.merchantOrderId);
+            const state = s?.data?.state as string | undefined;
+            if (state === "COMPLETED" || state === "FAILED") { finalState = state; break; }
+            await new Promise((r) => setTimeout(r, attempts < 5 ? 2000 : 5000));
+            attempts++;
+          }
+          if (finalState === "COMPLETED") {
+            toast("Payment successful", { description: `Order confirmed.` });
+            clear();
+            navigate(`/order-confirmation/${init.orderId}`);
+          } else if (finalState === "FAILED") {
+            toast("Payment failed", { description: "Your payment could not be completed." });
+          } else {
+            toast("Payment pending", { description: "We are still processing your payment." });
+          }
+        } catch (err: any) {
+          toast("Could not verify payment", { description: err?.message || "Please check later." });
+        } finally {
+          setLoading(false);
+        }
+      });
+    } catch (err: any) {
+      toast("Unable to start payment", { description: err?.message || "Please try again." });
+      setLoading(false);
     }
   };
 

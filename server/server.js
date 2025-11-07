@@ -17,6 +17,7 @@ const shopAddressRouter = require("./routes/shop/address-routes");
 const shopOrderRouter = require("./routes/shop/order-routes");
 const shopSearchRouter = require("./routes/shop/search-routes");
 const shopReviewRouter = require("./routes/shop/review-routes");
+const phonepeStdRouter = require('./routes/shop/phonepe-standard-routes');
 
 const commonFeatureRouter = require("./routes/common/feature-routes");
 
@@ -102,6 +103,7 @@ app.use("/api/shop/address", shopAddressRouter);
 app.use("/api/shop/order", shopOrderRouter);
 app.use("/api/shop/search", shopSearchRouter);
 app.use("/api/shop/review", shopReviewRouter);
+app.use('/api/shop/payment/phonepe', phonepeStdRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
 
