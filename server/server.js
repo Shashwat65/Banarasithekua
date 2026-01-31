@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 const authRouter = require("./routes/auth/auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
@@ -110,5 +111,14 @@ app.use("/api/common/feature", commonFeatureRouter);
 // Public combos (active only)
 const { listActiveCombos } = require('./controllers/admin/combo-controller');
 app.get('/api/shop/combos/get', listActiveCombos);
+
+// Serve static files from the React app (client build)
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+// Handle React routing, return all requests to React app
+// This must come after all API routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+});
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
