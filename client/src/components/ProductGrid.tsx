@@ -3,15 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { sampleProducts } from "@/lib/sampleProducts";
-import { combosAPI } from "@/services/api";
+import { combosAPI, productsAPI } from "@/services/api";
 
 const ProductGrid = () => {
   const { data } = useQuery({
     queryKey: ["products", "featured"],
     queryFn: async () => {
-      const res = await fetch("/api/products");
-      if (!res.ok) throw new Error("Failed to fetch products");
-      return res.json();
+      const res = await productsAPI.getAll();
+      return res.data;
     },
   });
 

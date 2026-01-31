@@ -1,6 +1,13 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const rawApiBase = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_PROXY;
+const normalizeApiBase = (value?: string) => {
+  if (!value) return "http://localhost:5000/api";
+  const trimmed = value.replace(/\/+$/, "");
+  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+};
+
+const API_URL = normalizeApiBase(rawApiBase);
 
 // Create axios instance configured for cookie-based auth
 export const api = axios.create({
