@@ -90,6 +90,22 @@ app.use((req, res, next) => {
   res.header('Access-Control-Expose-Headers', 'Content-Length, X-Requested-With');
   next();
 });
+
+// Serve static files from the React app (client build) - BEFORE API routes
+// This ensures static assets (JS, CSS, images) are served properly
+const staticPath = path.join(__dirname, "../client/dist");
+app.use(express.static(staticPath, {
+  index: false, // Don't serve index.html for directory requests yet
+  maxAge: '1d',
+  setHeaders: (res, path) => {
+    // Cache static assets aggressively
+    if (path.endsWith('.js') || path.endsWith('.css') || path.endsWith('.woff') || path.endsWith('.woff2')) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+    }
+  }
+}));
+
+// API Routes - these take priority over the SPA fallback
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/admin/orders", adminOrderRouter);
@@ -112,13 +128,21 @@ app.use("/api/common/feature", commonFeatureRouter);
 const { listActiveCombos } = require('./controllers/admin/combo-controller');
 app.get('/api/shop/combos/get', listActiveCombos);
 
-// Serve static files from the React app (client build)
-app.use(express.static(path.join(__dirname, "../client/dist")));
-
-// Handle React routing, return all requests to React app
-// This must come after all API routes
+// SPA Fallback - Must be LAST
+// This catches all non-API, non-static-file requests and serves index.html
+// Allowing React Router to handle the routing
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+  // Don't serve SPA for API routes that somehow got here
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'API endpoint not found' });
+  }
+  
+  res.sendFile(path.join(staticPath, "index.html"), (err) => {
+    if (err) {
+      console.error('Error serving index.html:', err);
+      res.status(500).send('Error loading application');
+    }
+  });
 });
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
