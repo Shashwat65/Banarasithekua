@@ -46,16 +46,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // First, restore from localStorage immediately
         const stored = localStorage.getItem("user");
         if (stored) {
           try {
             const parsed = JSON.parse(stored);
-            if (parsed?.email) setUser(parsed);
+            if (parsed?.email && parsed?.id) {
+              setUser(parsed);
+              // Then verify with server in background
+              refresh().catch(() => {
+                // If verification fails, user stays logged in with cached data
+                // Only logout if explicitly unauthorized (401)
+              });
+            } else {
+              localStorage.removeItem("user");
+            }
           } catch {
             localStorage.removeItem("user");
           }
+        } else {
+          // No stored user, try to check auth anyway (in case of cookie-only auth)
+          await refresh();
         }
-        await refresh();
       } finally {
         setIsLoading(false);
       }
@@ -75,12 +87,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return mapped;
         }
       }
-    } catch (error) {
-      console.warn("Auth refresh failed", error);
+      // Only clear user if we got a definitive "not authenticated" response
+      throw new Error("Not authenticated");
+    } catch (error: any) {
+      // Only clear auth on 401 (unauthorized)
+      if (error.response?.status === 401) {
+        console.warn("Auth expired or invalid");
+        setUser(null);
+        localStorage.removeItem("user");
+      }
+      // For network errors or other issues, keep existing user state
+      return null;
     }
-    setUser(null);
-    localStorage.removeItem("user");
-    return null;
   };
 
   const login = async (email: string, password: string) => {
