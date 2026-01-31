@@ -1,0 +1,14 @@
+{
+  "routes": [
+    {
+      "source": "/api/**",
+      "destination": "https://your-api.onrender.com/api/:splat",
+      "type": "proxy"
+    },
+    {
+      "source": "/**",
+      "destination": "/index.html",
+      "type": "rewrite"
+    }
+  ]
+}

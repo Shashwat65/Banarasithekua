@@ -3,15 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found</title>
+    <title>Loading...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f6f1e9;
+        }
+        .loader {
+            text-align: center;
+            color: #543021;
+        }
+    </style>
     <script>
-        // Redirect all 404s to index.html for SPA routing
-        // This is a fallback in case server-side routing fails
-        sessionStorage.setItem('redirect', location.href);
-        location.replace('/');
+        // SPA fallback - preserve the current path and load the app
+        // This ensures /terms opens the terms page, not homepage
+        (function() {
+            // Get the current path
+            var path = window.location.pathname;
+            var search = window.location.search;
+            var hash = window.location.hash;
+            
+            // Store the intended path so the app can restore it
+            if (path !== '/') {
+                sessionStorage.setItem('spa_redirect', path + search + hash);
+            }
+            
+            // Load index.html while preserving the URL
+            // This triggers React Router to handle the routing
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/index.html', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.open();
+                    document.write(xhr.responseText);
+                    document.close();
+                }
+            };
+            xhr.send();
+        })();
     </script>
 </head>
 <body>
-    <p>Redirecting...</p>
+    <div class="loader">
+        <p>Loading...</p>
+    </div>
 </body>
 </html>
