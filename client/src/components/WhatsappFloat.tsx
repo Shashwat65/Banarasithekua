@@ -1,7 +1,7 @@
 import { MessageCircle } from 'lucide-react';
 
 const WhatsappFloat = () => {
-  const phone = '+919981155442'; // central support number
+  const phone = '+919693056200'; // central support number
   const message = encodeURIComponent('Hi! I would like to know more about Banarasi Thekua.');
   const href = `https://wa.me/${phone.replace(/[^\d]/g,'')}?text=${message}`;
   return (

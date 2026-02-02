@@ -10,7 +10,7 @@ export default function Contact() {
       <div className="space-y-4 text-sm text-secondary/70">
         <p>📍 Maruti Nagar Colony, Samneghat, Varanasi (Beside Kidzee School)</p>
   <p>✉️ info@banarasithekua.com</p>
-        <p>📞 +91 99811 55442</p>
+        <p>📞 +91 96930 56200</p>
         <p>Customer Care: Mon–Sat, 9 AM – 8 PM IST</p>
       </div>
       <p className="text-xs text-secondary/50">For bulk / gifting enquiries email with subject: <span className="font-mono">GIFTING-ENQUIRY</span>.</p>

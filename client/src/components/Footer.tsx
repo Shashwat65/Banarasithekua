@@ -45,7 +45,7 @@ const Footer = () => {
                 <Mail className="h-5 w-5" />
               </a>
               <a
-                href="https://wa.me/919981155442?text=Hi!%20I%20would%20like%20to%20know%20more%20about%20Banarasi%20Thekua."
+                href="https://wa.me/919693056200?text=Hi!%20I%20would%20like%20to%20know%20more%20about%20Banarasi%20Thekua."
                 aria-label="WhatsApp"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -63,7 +63,6 @@ const Footer = () => {
               <li><a href="#products" className="hover:text-[#f6f1e9] transition">Shop</a></li>
               <li><a href="#team" className="hover:text-[#f6f1e9] transition">Team</a></li>
               <li><Link to="/about" className="hover:text-[#f6f1e9] transition">About Us</Link></li>
-              <li><a href="#reviews" className="hover:text-[#f6f1e9] transition">Testimonials</a></li>
               <li><Link to="/contact" className="hover:text-[#f6f1e9] transition">Contact</Link></li>
             </ul>
           </div>
@@ -83,7 +82,7 @@ const Footer = () => {
               <p>📍 Maruti Nagar Colony, Samneghat, Varanasi</p>
               <p>• Landmark: Beside Kidzee School, Maruti Nagar</p>
               <p>✉️ info@banarasithekua.com</p>
-              <p>📞 +91 99811 55442</p>
+              <p>📞 +91 96930 56200</p>
               <p className="text-xs text-[#f6f1e9]/40">Customer Care: Mon–Sat, 9 AM – 8 PM IST</p>
             </div>
           </div>
