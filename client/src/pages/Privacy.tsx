@@ -52,7 +52,7 @@ const Privacy = () => {
           <p>
             Email <a href="mailto:info@banarasithekua.com" className="underline">info@banarasithekua.com</a> or call
             {" "}
-            <a href="tel:+919981155442" className="underline">+91 99811 55442</a>.
+            <a href="tel:+919693056200" className="underline">+91 96930 56200</a>.
           </p>
         </div>
       </div>

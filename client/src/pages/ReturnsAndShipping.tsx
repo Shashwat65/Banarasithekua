@@ -60,7 +60,7 @@ const ReturnsAndShipping = () => {
           <p>
             Write to <a href="mailto:info@banarasithekua.com" className="underline">info@banarasithekua.com</a> or call
             {" "}
-            <a href="tel:+919981155442" className="underline">+91 99811 55442</a> for any return or shipping query.
+            <a href="tel:+919693056200" className="underline">+91 96930 56200</a> for any return or shipping query.
           </p>
         </div>
       </div>
