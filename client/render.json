@@ -2,7 +2,7 @@
   "routes": [
     {
       "source": "/api/**",
-      "destination": "https://your-api.onrender.com/api/:splat",
+      "destination": "https://banarasithekuabackend.onrender.com/api/:splat",
       "type": "proxy"
     },
     {
