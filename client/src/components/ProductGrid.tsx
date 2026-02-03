@@ -10,7 +10,7 @@ const ProductGrid = () => {
     queryKey: ["products", "featured"],
     queryFn: async () => {
       const res = await productsAPI.getAll();
-      return res.data;
+      return res.data?.data || [];
     },
   });
 
@@ -26,7 +26,7 @@ const ProductGrid = () => {
     },
   });
 
-  const products = (data?.items as any[])?.length ? data.items : sampleProducts;
+  const products = (Array.isArray(data) && data.length > 0 ? data : null) || sampleProducts;
 
   return (
     <section id="products" className="py-24">
@@ -104,7 +104,9 @@ const ProductGrid = () => {
                         )}
                       </div>
                     </div>
-                    <Button className="mt-6 w-full" variant="outline">View Details</Button>
+                    <Button className="mt-6 w-full" variant="outline" asChild>
+                      <Link to={`/combos/${combo.slug || combo._id}`}>View Details</Link>
+                    </Button>
                   </div>
                 );
               })}
