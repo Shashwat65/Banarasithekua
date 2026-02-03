@@ -22,6 +22,16 @@ const Index = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    const hash = location.hash ? location.hash.replace('#', '') : '';
+    if (!hash) return;
+    const el = document.getElementById(hash);
+    if (!el) return;
+    setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }, [location.hash]);
+
   return (
     <div className="min-h-screen bg-background">
       <section id="hero">

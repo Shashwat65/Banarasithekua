@@ -54,10 +54,10 @@ const ProductGrid = () => {
                 key={id}
                 id={id}
                 slug={slug}
-                name={product.name}
+                name={product.name || product.title || "Product"}
                 image={image}
-                price={product.price}
-                originalPrice={product.originalPrice}
+                price={typeof product.price === "number" ? product.price : Number(product.price || 0)}
+                originalPrice={product.originalPrice ? Number(product.originalPrice) : undefined}
                 isOnSale={product.originalPrice ? product.originalPrice > product.price : false}
                 isSoldOut={product.stock !== undefined ? product.stock <= 0 : false}
                 description={product.description}

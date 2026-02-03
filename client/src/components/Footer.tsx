@@ -59,9 +59,10 @@ const Footer = () => {
           <div className="lg:col-span-2 space-y-4">
             <h5 className="text-sm font-semibold uppercase tracking-[0.35em] text-[#f6f1e9]/60">Quick Links</h5>
             <ul className="space-y-3 text-sm text-[#f6f1e9]/70">
-              <li><a href="#hero" className="hover:text-[#f6f1e9] transition">Home</a></li>
-              <li><a href="#products" className="hover:text-[#f6f1e9] transition">Shop</a></li>
-              <li><a href="#team" className="hover:text-[#f6f1e9] transition">Team</a></li>
+              <li><Link to="/#hero" className="hover:text-[#f6f1e9] transition">Home</Link></li>
+              <li><Link to="/#products" className="hover:text-[#f6f1e9] transition">Shop</Link></li>
+              <li><Link to="/#team" className="hover:text-[#f6f1e9] transition">Team</Link></li>
+              <li><Link to="/combos" className="hover:text-[#f6f1e9] transition">Combos</Link></li>
               <li><Link to="/about" className="hover:text-[#f6f1e9] transition">About Us</Link></li>
               <li><Link to="/contact" className="hover:text-[#f6f1e9] transition">Contact</Link></li>
             </ul>
