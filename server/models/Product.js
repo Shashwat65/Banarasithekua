@@ -19,6 +19,7 @@ const ProductSchema = new mongoose.Schema(
     stock: Number,
     weight: String,
     packSize: String,
+    attributes: { type: Object },
     // images array for future expansion
     images: [
       {
