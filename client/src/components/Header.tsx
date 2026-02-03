@@ -27,7 +27,6 @@ import {
 const NAV_LINKS: { label: string; section: string }[] = [
   { label: "Home", section: "hero" },
   { label: "Shop", section: "products" },
-  { label: "Reviews", section: "reviews" },
   { label: "Values", section: "values" },
   { label: "Story", section: "story" },
   { label: "Contact", section: "footer" },
