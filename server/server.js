@@ -109,6 +109,9 @@ app.use(express.static(staticPath, {
   }
 }));
 
+// Serve uploaded images from local storage
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // API Routes - these take priority over the SPA fallback
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);
