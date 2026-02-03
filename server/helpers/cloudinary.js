@@ -1,23 +1,25 @@
-const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
-// Load credentials from environment (already loaded in server.js via dotenv)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "",
-  api_key: process.env.CLOUDINARY_API_KEY || "",
-  api_secret: process.env.CLOUDINARY_API_SECRET || "",
-});
-
-const storage = new multer.memoryStorage();
-
-async function imageUploadUtil(file) {
-  const result = await cloudinary.uploader.upload(file, {
-    resource_type: "auto",
-  });
-
-  return result;
+const uploadDir = path.join(__dirname, "..", "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname || "");
+    const safeName = file.originalname
+      ? file.originalname.replace(/[^a-z0-9\.\-]/gi, "-")
+      : "image";
+    cb(null, `${Date.now()}-${safeName}${ext && !safeName.endsWith(ext) ? ext : ""}`);
+  },
+});
 
 const upload = multer({ storage });
 
-module.exports = { upload, imageUploadUtil };
+module.exports = { upload };

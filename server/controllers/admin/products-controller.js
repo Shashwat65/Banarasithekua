@@ -1,4 +1,3 @@
-const { imageUploadUtil } = require("../../helpers/cloudinary");
 const Product = require("../../models/Product");
 const { generateUniqueSlug, slugify } = require("../../utils/slug");
 
@@ -7,18 +6,15 @@ const handleImageUpload = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: "No file uploaded" });
     }
-    const b64 = Buffer.from(req.file.buffer).toString("base64");
-    const url = "data:" + req.file.mimetype + ";base64," + b64;
-    const result = await imageUploadUtil(url);
+
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
     res.json({
       success: true,
       data: {
-        url: result.secure_url || result.url,
-        public_id: result.public_id,
-        width: result.width,
-        height: result.height,
-        format: result.format,
+        url: fileUrl,
+        public_id: req.file.filename,
       },
     });
   } catch (error) {
