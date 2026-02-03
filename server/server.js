@@ -98,6 +98,20 @@ app.use((req, res, next) => {
 // Serve static files from the React app (client build) - BEFORE API routes
 // This ensures static assets (JS, CSS, images) are served properly
 const staticPath = path.join(__dirname, "../client/dist");
+
+// Verify the static path exists and log it
+console.log('Static path:', staticPath);
+try {
+  const fs = require('fs');
+  if (fs.existsSync(staticPath)) {
+    console.log('✅ Client dist directory found');
+  } else {
+    console.warn('⚠️ Client dist directory NOT found at:', staticPath);
+  }
+} catch (err) {
+  console.error('Error checking static path:', err);
+}
+
 app.use(express.static(staticPath, {
   index: false, // Don't serve index.html for directory requests yet
   maxAge: '1d',
@@ -141,12 +155,15 @@ app.use("/api/common/slider", commonSliderRouter);
 app.get("*", (req, res) => {
   // Don't serve SPA for API routes that somehow got here
   if (req.path.startsWith('/api/')) {
+    console.log(`❌ API endpoint not found: ${req.method} ${req.path}`);
     return res.status(404).json({ message: 'API endpoint not found' });
   }
   
-  res.sendFile(path.join(staticPath, "index.html"), (err) => {
+  console.log(`📄 Serving SPA for: ${req.method} ${req.path}`);
+  const indexPath = path.join(staticPath, "index.html");
+  res.sendFile(indexPath, (err) => {
     if (err) {
-      console.error('Error serving index.html:', err);
+      console.error('❌ Error serving index.html from:', indexPath, err);
       res.status(500).send('Error loading application');
     }
   });
