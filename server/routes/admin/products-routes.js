@@ -9,8 +9,14 @@ const {
 } = require("../../controllers/admin/products-controller");
 
 const { upload } = require("../../helpers/cloudinary");
+const { authMiddleware } = require("../../controllers/auth/auth-controller");
 
 const router = express.Router();
+
+router.use(authMiddleware, (req, res, next) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ success: false, message: 'Admins only' });
+  next();
+});
 
 router.post("/upload-image", upload.single("my_file"), handleImageUpload);
 router.post("/add", addProduct);

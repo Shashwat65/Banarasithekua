@@ -1,4 +1,5 @@
 const Product = require("../../models/Product");
+const mongoose = require("mongoose");
 
 const getFilteredProducts = async (req, res) => {
   try {
@@ -40,14 +41,14 @@ const getFilteredProducts = async (req, res) => {
         break;
     }
 
-    const products = await Product.find(filters).sort(sort);
+    const products = await Product.find(filters).sort(sort).populate('category');
 
     res.status(200).json({
       success: true,
       data: products,
     });
   } catch (e) {
-    console.log(error);
+    console.log(e);
     res.status(500).json({
       success: false,
       message: "Some error occured",
@@ -58,20 +59,28 @@ const getFilteredProducts = async (req, res) => {
 const getProductDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
+    let product = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findById(id).populate('category');
+    }
 
-    if (!product)
+    if (!product) {
+      product = await Product.findOne({ slug: id }).populate('category');
+    }
+
+    if (!product) {
       return res.status(404).json({
         success: false,
         message: "Product not found!",
       });
+    }
 
     res.status(200).json({
       success: true,
       data: product,
     });
   } catch (e) {
-    console.log(error);
+    console.log(e);
     res.status(500).json({
       success: false,
       message: "Some error occured",

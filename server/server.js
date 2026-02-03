@@ -11,6 +11,7 @@ const adminCategoryRouter = require("./routes/admin/category-routes");
 const adminUserRouter = require("./routes/admin/user-routes");
 const adminComboRouter = require("./routes/admin/combo-routes");
 const adminTeamRouter = require("./routes/admin/team-routes");
+const adminSliderRouter = require("./routes/admin/slider-routes");
 
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
@@ -19,8 +20,11 @@ const shopOrderRouter = require("./routes/shop/order-routes");
 const shopSearchRouter = require("./routes/shop/search-routes");
 const shopReviewRouter = require("./routes/shop/review-routes");
 const phonepeStdRouter = require('./routes/shop/phonepe-standard-routes');
+const shopCombosRouter = require('./routes/shop/combos-routes');
 
 const commonFeatureRouter = require("./routes/common/feature-routes");
+const commonTeamRouter = require("./routes/common/team-routes");
+const commonSliderRouter = require("./routes/common/slider-routes");
 
 //create a database connection -> u can also
 //create a separate file for this and then import/use that file here
@@ -113,6 +117,7 @@ app.use("/api/admin/categories", adminCategoryRouter);
 app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/combos", adminComboRouter);
 app.use("/api/admin/team", adminTeamRouter);
+app.use("/api/admin/sliders", adminSliderRouter);
 
 app.use("/api/shop/products", shopProductsRouter);
 app.use("/api/shop/cart", shopCartRouter);
@@ -121,12 +126,11 @@ app.use("/api/shop/order", shopOrderRouter);
 app.use("/api/shop/search", shopSearchRouter);
 app.use("/api/shop/review", shopReviewRouter);
 app.use('/api/shop/payment/phonepe', phonepeStdRouter);
+app.use('/api/shop/combos', shopCombosRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
-
-// Public combos (active only)
-const { listActiveCombos } = require('./controllers/admin/combo-controller');
-app.get('/api/shop/combos/get', listActiveCombos);
+app.use("/api/common/team", commonTeamRouter);
+app.use("/api/common/slider", commonSliderRouter);
 
 // SPA Fallback - Must be LAST
 // This catches all non-API, non-static-file requests and serves index.html
