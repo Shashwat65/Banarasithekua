@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { categoriesAPI, productsAPI, ordersAPI, adminAPI, uploadAPI, combosAPI, teamAPI } from "@/services/api";
+import { categoriesAPI, productsAPI, ordersAPI, adminAPI, uploadAPI, combosAPI, teamAPI, sliderAPI } from "@/services/api";
 import {
   LayoutDashboard,
   ShoppingBasket,
@@ -43,7 +43,7 @@ type Order = {
   isPaid?: boolean;
 };
 
-type ImageItem = { url: string; public_id: string; width?: number; height?: number; uploadedAt: string };
+type ImageItem = { _id?: string; url: string; public_id?: string; width?: number; height?: number; uploadedAt?: string; active?: boolean; sortOrder?: number };
 type AdminUser = { _id: string; name: string; email: string; role: "user" | "admin" };
 
 export default function Admin() {
@@ -82,7 +82,7 @@ export default function Admin() {
   // Team state
   const [team, setTeam] = useState<any[]>([]);
   const [teamForm, setTeamForm] = useState({ name: "", role: "", photo: "", order: "0", active: true });
-  const loadTeam = async () => { try { const res = await teamAPI.getAll(); setTeam(res.data.data || []); } catch { /* ignore */ } };
+  const loadTeam = async () => { try { const res = await teamAPI.getAllAdmin(); setTeam(res.data.data || []); } catch { /* ignore */ } };
 
   const loadCombos = async () => {
     try {
@@ -96,7 +96,6 @@ export default function Admin() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const galleryKey = "admin_image_gallery";
-  const sliderKey = "hero_slider_images";
   const gallery: ImageItem[] = useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem(galleryKey) || "[]");
@@ -105,13 +104,7 @@ export default function Admin() {
     }
   }, []);
   const [images, setImages] = useState<ImageItem[]>(gallery);
-  const [sliderImages, setSliderImages] = useState<ImageItem[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(sliderKey) || "[]");
-    } catch {
-      return [];
-    }
-  });
+  const [sliderImages, setSliderImages] = useState<ImageItem[]>([]);
   const [sliderUrl, setSliderUrl] = useState("");
   // Users management
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -123,9 +116,13 @@ export default function Admin() {
     localStorage.setItem(galleryKey, JSON.stringify(items));
   };
 
-  const saveSlider = (items: ImageItem[]) => {
-    setSliderImages(items);
-    localStorage.setItem(sliderKey, JSON.stringify(items));
+  const loadSliderImages = async () => {
+    try {
+      const res = await sliderAPI.getAllAdmin();
+      setSliderImages(res.data.data || []);
+    } catch {
+      setSliderImages([]);
+    }
   };
 
   const slugify = (value: string) =>
@@ -182,6 +179,7 @@ export default function Admin() {
     loadOrders();
     loadCombos();
     loadTeam();
+    loadSliderImages();
   }, [user]);
 
   const submitCategory = async (e: FormEvent) => {
@@ -268,7 +266,9 @@ export default function Admin() {
       weight: productForm.weight || undefined,
       packSize: productForm.packSize || undefined,
       category: productForm.categoryId || undefined,
-      // Optional attributes mapping to tags or nutritional info could be added here if backend supports
+      image: selectedImages[0]?.url || productForm.image || undefined,
+      images: selectedImages.length > 0 ? selectedImages : undefined,
+      attributes: Object.keys(attributes).length ? attributes : undefined,
     };
     try {
       await productsAPI.create(payload);
@@ -1014,11 +1014,16 @@ export default function Admin() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => {
+                      onClick={async () => {
                         if (!sliderUrl.trim()) return;
-                        const next: ImageItem = { url: sliderUrl.trim(), public_id: "", uploadedAt: new Date().toISOString() };
-                        saveSlider([next, ...sliderImages]);
-                        setSliderUrl("");
+                        try {
+                          await sliderAPI.create({ url: sliderUrl.trim() });
+                          setSliderUrl("");
+                          await loadSliderImages();
+                          toast("Added to slider");
+                        } catch (err: any) {
+                          toast(err.response?.data?.message || "Failed to add");
+                        }
                       }}
                     >Add URL</Button>
                   </div>
@@ -1032,9 +1037,14 @@ export default function Admin() {
                           form.append("image", file);
                           const res = await uploadAPI.uploadImage(form);
                           const data = res.data.data;
-                          const next: ImageItem = { url: data.url, public_id: data.public_id, width: data.width, height: data.height, uploadedAt: new Date().toISOString() };
-                          saveSlider([next, ...sliderImages]);
+                          await sliderAPI.create({
+                            url: data.url,
+                            public_id: data.public_id,
+                            width: data.width,
+                            height: data.height,
+                          });
                           setFile(null);
+                          await loadSliderImages();
                           toast("Added to slider");
                         } catch (err: any) {
                           toast(err.response?.data?.message || "Upload failed");
@@ -1044,7 +1054,19 @@ export default function Admin() {
                       }}
                       disabled={isUploading}
                     >{isUploading ? "Uploading..." : "Upload & Add"}</Button>
-                    <Button variant="secondary" onClick={() => saveSlider([])}>Clear all</Button>
+                    <Button
+                      variant="secondary"
+                      onClick={async () => {
+                        if (!confirm('Clear all slider images?')) return;
+                        try {
+                          await Promise.all(sliderImages.map((img) => img._id ? sliderAPI.delete(img._id) : Promise.resolve()));
+                          await loadSliderImages();
+                          toast("Slider cleared");
+                        } catch (err: any) {
+                          toast(err.response?.data?.message || "Failed to clear");
+                        }
+                      }}
+                    >Clear all</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1055,26 +1077,27 @@ export default function Admin() {
                   <CardContent>
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       {sliderImages.map((img) => (
-                        <div key={(img.public_id || img.url)} className="rounded-xl overflow-hidden border border-border/60">
+                        <div key={(img._id || img.public_id || img.url)} className="rounded-xl overflow-hidden border border-border/60">
                           <img src={img.url} alt={img.public_id || img.url} className="w-full h-48 object-cover" />
                           <div className="p-3 flex items-center justify-between text-sm">
                             <span className="truncate max-w-[70%]" title={img.public_id || img.url}>
                               {(img.public_id && img.public_id.split('/').pop()) || img.url}
                             </span>
                             <div className="flex items-center gap-2">
-                              {img.public_id ? (
-                                <Button size="sm" variant="outline" onClick={async () => {
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  if (!img._id) return;
                                   try {
-                                    await uploadAPI.deleteImage(img.public_id);
-                                  } catch {
-                                    // ignore cloud delete error, still remove locally
+                                    await sliderAPI.delete(img._id);
+                                    await loadSliderImages();
+                                    toast("Removed");
+                                  } catch (err: any) {
+                                    toast(err.response?.data?.message || "Delete failed");
                                   }
-                                  saveSlider(sliderImages.filter((s) => s !== img));
-                                  toast("Removed");
-                                }}>Delete</Button>
-                              ) : (
-                                <Button size="sm" variant="outline" onClick={() => { saveSlider(sliderImages.filter((s) => s !== img)); toast("Removed"); }}>Remove</Button>
-                              )}
+                                }}
+                              >Delete</Button>
                             </div>
                           </div>
                         </div>

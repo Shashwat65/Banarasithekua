@@ -59,6 +59,7 @@ const ComboGrid = () => {
                   description={combo.description}
                   slug={combo.slug}
                   category="Combo"
+                  basePath="/combos"
                 />
               </div>
             );

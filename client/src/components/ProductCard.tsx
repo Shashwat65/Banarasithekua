@@ -18,6 +18,7 @@ interface ProductCardProps {
   slug?: string | null;
   category?: string | null;
   stock?: number | null | undefined;
+  basePath?: string;
 }
 
 const ProductCard = ({ 
@@ -33,12 +34,14 @@ const ProductCard = ({
   slug,
   category,
   stock,
+  basePath,
 }: ProductCardProps) => {
   const { addItem } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const detailPath = slug ? `/products/${slug}` : `/products/${id}`;
+  const base = basePath || "/products";
+  const detailPath = slug ? `${base}/${slug}` : `${base}/${id}`;
   const blurb = description?.trim() || "A wholesome mithai crafted fresh every morning.";
 
   const ensureAuth = (redirect?: string) => {

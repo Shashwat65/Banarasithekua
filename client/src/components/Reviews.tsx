@@ -28,7 +28,6 @@ import { teamAPI } from '@/services/api';
 
 interface TeamMember { _id: string; name: string; role: string; photo?: string; active?: boolean; }
 
-// Single current team member (as requested)
 const fallbackTeam: TeamMember[] = [
   { _id: 'chinmay', name: 'Chinmay Pandey', role: 'Founder & Recipe Lead', photo: teamPhoto },
 ];
@@ -94,16 +93,12 @@ const TeamSection = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await teamAPI.getAll();
-        if (Array.isArray(res.data.data)) {
-          const chinmay = res.data.data.find((m: TeamMember) => /chinmay/i.test(m.name));
-          if (chinmay) {
-            setTeam([{ ...chinmay }]);
-            return;
-          }
+        const res = await teamAPI.getAllPublic();
+        if (Array.isArray(res.data.data) && res.data.data.length > 0) {
+          setTeam(res.data.data);
+          return;
         }
       } catch {/* ignore network issues; fallback used */}
-      // ensure only single fallback member
       setTeam(fallbackTeam);
     })();
   }, []);
@@ -114,7 +109,7 @@ const TeamSection = () => {
             <h3 className="text-3xl sm:text-4xl font-semibold text-secondary">People Behind The Craft</h3>
             <p className="text-secondary/70 text-sm sm:text-base">A small team devoted to preserving traditional flavours while maintaining modern cleanliness and consistency.</p>
           </div>
-          <div className="grid gap-10 sm:grid-cols-1 place-items-center">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 place-items-center">
             {team.map(member => (
               <div key={member._id} className="group relative overflow-hidden rounded-[28px] border border-border/60 bg-white shadow-[0_24px_40px_rgba(84,48,33,0.12)]">
                 <div className="h-72">
