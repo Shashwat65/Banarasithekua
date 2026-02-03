@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { teamAPI } from '@/services/api';
 import teamPhoto from '@/assets/team-member.jpg';
 
 const reviewGallery = [
@@ -22,9 +24,6 @@ const reviewGallery = [
     city: "Bengaluru",
   },
 ];
-
-import { useEffect, useState } from 'react';
-import { teamAPI } from '@/services/api';
 
 interface TeamMember { _id: string; name: string; role: string; photo?: string; active?: boolean; }
 
