@@ -9,9 +9,14 @@ const createMember = async (req,res) => {
   } catch(e){ console.error(e); res.status(500).json({ success:false, message:'Failed to create member'}); }
 };
 
-const listMembers = async (_req,res) => {
+const listMembers = async (req,res) => {
   try {
-    const members = await TeamMember.find({}).sort({ order:1, createdAt:-1 });
+    const { active } = req.query;
+    const filter = {};
+    if (typeof active !== 'undefined') {
+      filter.active = String(active) === 'true';
+    }
+    const members = await TeamMember.find(filter).sort({ order:1, createdAt:-1 });
     res.json({ success:true, data: members });
   } catch(e){ console.error(e); res.status(500).json({ success:false, message:'Failed to fetch members'}); }
 };

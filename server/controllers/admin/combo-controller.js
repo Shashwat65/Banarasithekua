@@ -1,28 +1,40 @@
-// Clean consolidated Combo controller (removes prior duplicated blocks)
 const Combo = require('../../models/Combo');
+const { generateUniqueSlug, slugify } = require('../../utils/slug');
 
-// Create combo (supports productIds/products + images array)
+const normalizeProducts = (body) => {
+  if (Array.isArray(body.productIds) && body.productIds.length > 0) return body.productIds;
+  if (Array.isArray(body.products) && body.products.length > 0) return body.products;
+  return [];
+};
+
+// Create combo
 const createCombo = async (req, res) => {
   try {
-    const { name, slug, description, productIds = [], products = [], price, originalPrice, image, images = [], active = true, sortOrder = 0 } = req.body;
-    if (!name || !slug || typeof price === 'undefined') {
-      return res.status(400).json({ success: false, message: 'name, slug & price are required' });
+    const body = req.body || {};
+    const name = body.name;
+    if (!name || typeof body.price === 'undefined') {
+      return res.status(400).json({ success: false, message: 'name and price are required' });
     }
-    // Harmonize arrays (prefer productIds; fall back to products)
-    const finalProductIds = Array.isArray(productIds) && productIds.length > 0 ? productIds : products;
+    const rawSlug = body.slug || slugify(name);
+    const slug = await generateUniqueSlug(Combo, rawSlug);
+    const products = normalizeProducts(body);
+    const images = Array.isArray(body.images) ? body.images.slice(0, 10) : [];
+    const image = body.image || images[0]?.url;
+
     const combo = await Combo.create({
       name,
       slug,
-      description,
-      productIds: finalProductIds,
-      products: finalProductIds, // keep legacy field in sync
-      price,
-      originalPrice,
+      description: body.description,
+      productIds: products,
+      products,
+      price: body.price,
+      originalPrice: body.originalPrice,
       image,
-      images: Array.isArray(images) ? images.slice(0, 10) : [],
-      active,
-      sortOrder: Number(sortOrder) || 0,
+      images,
+      active: typeof body.active === 'boolean' ? body.active : true,
+      sortOrder: Number(body.sortOrder) || 0,
     });
+
     const populated = await Combo.findById(combo._id).populate('productIds');
     res.status(201).json({ success: true, data: populated });
   } catch (e) {
@@ -69,18 +81,29 @@ const getCombo = async (req, res) => {
 const updateCombo = async (req, res) => {
   try {
     const { id } = req.params;
+    const body = req.body || {};
     const combo = await Combo.findById(id);
     if (!combo) return res.status(404).json({ success: false, message: 'Combo not found' });
-    const fields = ['name', 'slug', 'description', 'price', 'originalPrice', 'image', 'active', 'sortOrder'];
-    fields.forEach(f => { if (typeof req.body[f] !== 'undefined') combo[f] = f === 'sortOrder' ? Number(req.body[f]) : req.body[f]; });
-    if (Array.isArray(req.body.productIds)) {
-      combo.productIds = req.body.productIds;
-      combo.products = req.body.productIds; // sync legacy
-    } else if (Array.isArray(req.body.products)) { // fallback
-      combo.productIds = req.body.products;
-      combo.products = req.body.products;
+
+    if (body.name) combo.name = body.name;
+    if (body.slug || body.name) {
+      const baseSlug = body.slug || body.name || combo.slug;
+      combo.slug = await generateUniqueSlug(Combo, baseSlug, combo._id);
     }
-    if (Array.isArray(req.body.images)) combo.images = req.body.images.slice(0, 10);
+    if (typeof body.description !== 'undefined') combo.description = body.description;
+    if (typeof body.price !== 'undefined') combo.price = body.price;
+    if (typeof body.originalPrice !== 'undefined') combo.originalPrice = body.originalPrice;
+    if (typeof body.image !== 'undefined') combo.image = body.image;
+    if (typeof body.active !== 'undefined') combo.active = body.active;
+    if (typeof body.sortOrder !== 'undefined') combo.sortOrder = Number(body.sortOrder) || 0;
+
+    if (Array.isArray(body.productIds) || Array.isArray(body.products)) {
+      const nextProducts = normalizeProducts(body);
+      combo.productIds = nextProducts;
+      combo.products = nextProducts;
+    }
+    if (Array.isArray(body.images)) combo.images = body.images.slice(0, 10);
+
     await combo.save();
     const populated = await Combo.findById(id).populate('productIds');
     res.json({ success: true, data: populated });

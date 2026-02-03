@@ -1,17 +1,16 @@
 const Category = require("../../models/Category");
+const { generateUniqueSlug, slugify } = require("../../utils/slug");
 
 // Create
 const createCategory = async (req, res) => {
   try {
     const { name, slug } = req.body;
-    if (!name || !slug) {
-      return res.status(400).json({ success: false, message: "Name & slug are required" });
+    if (!name) {
+      return res.status(400).json({ success: false, message: "Name is required" });
     }
-    const exists = await Category.findOne({ $or: [{ name }, { slug }] });
-    if (exists) {
-      return res.status(400).json({ success: false, message: "Category with same name or slug already exists" });
-    }
-    const category = await Category.create({ name, slug });
+    const rawSlug = slug || slugify(name);
+    const uniqueSlug = await generateUniqueSlug(Category, rawSlug);
+    const category = await Category.create({ name, slug: uniqueSlug });
     res.status(201).json({ success: true, data: category });
   } catch (e) {
     console.error(e);
@@ -38,7 +37,10 @@ const updateCategory = async (req, res) => {
     const category = await Category.findById(id);
     if (!category) return res.status(404).json({ success: false, message: "Category not found" });
     if (name) category.name = name;
-    if (slug) category.slug = slug;
+    if (slug || name) {
+      const baseSlug = slug || name || category.slug;
+      category.slug = await generateUniqueSlug(Category, baseSlug, category._id);
+    }
     await category.save();
     res.json({ success: true, data: category });
   } catch (e) {
