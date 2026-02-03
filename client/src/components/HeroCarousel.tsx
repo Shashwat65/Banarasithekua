@@ -6,6 +6,7 @@ import traditionalThekua from "@/assets/traditional-thekua.jpg";
 import jaggeryThekua from "@/assets/jaggery-thekua.jpg";
 import coconutThekua from "@/assets/coconut-thekua.jpg";
 import premiumMixedThekua from "@/assets/premium-mixed-thekua.jpg";
+import { sliderAPI } from "@/services/api";
 
 const defaultSlides = [
   {
@@ -48,26 +49,26 @@ const HERO_INTERVAL = 7000;
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Read admin-provided slider images from localStorage (set via Admin panel)
-  const adminSliderImages = useMemo(() => {
-    try {
-      const raw = localStorage.getItem("hero_slider_images");
-      const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) {
-        return parsed.filter((x) => x && typeof x.url === "string" && x.url.length > 0);
+  const [sliderImages, setSliderImages] = useState<{ url: string }[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await sliderAPI.getAllPublic();
+        const images = Array.isArray(res.data?.data) ? res.data.data : [];
+        setSliderImages(images.filter((x: any) => x && typeof x.url === "string"));
+      } catch {
+        setSliderImages([]);
       }
-      return [];
-    } catch {
-      return [];
-    }
+    })();
   }, []);
 
   // Chunk images into groups of 3 to match the layout
   const chunkedSlides = useMemo(() => {
-    if (!adminSliderImages.length) return defaultSlides;
+    if (!sliderImages.length) return defaultSlides;
     const chunks: string[][] = [];
-    for (let i = 0; i < adminSliderImages.length; i += 3) {
-      chunks.push(adminSliderImages.slice(i, i + 3).map((img: any) => img.url));
+    for (let i = 0; i < sliderImages.length; i += 3) {
+      chunks.push(sliderImages.slice(i, i + 3).map((img: any) => img.url));
     }
     // Build slides from chunks with generic copy
     return chunks.map((images, idx) => ({
@@ -81,7 +82,7 @@ const HeroCarousel = () => {
       accent: "Made with pure ghee",
       images,
     }));
-  }, [adminSliderImages]);
+  }, [sliderImages]);
 
   useEffect(() => {
     const timer = setInterval(() => {

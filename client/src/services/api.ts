@@ -72,7 +72,7 @@ export const authAPI = {
 // Products API
 export const productsAPI = {
   getAll: (params?: Record<string, any>) => api.get("/shop/products/get", { params }),
-  getById: (id: string) => api.get(`/shop/products/get/${id}`),
+  getById: (idOrSlug: string) => api.get(`/shop/products/get/${idOrSlug}`),
   create: (data: any) => api.post("/admin/products/add", data),
   update: (id: string, data: any) => api.put(`/admin/products/edit/${id}`, data),
   delete: (id: string) => api.delete(`/admin/products/delete/${id}`),
@@ -128,7 +128,8 @@ export const adminAPI = {
 
 // Combos API (admin + public helpers)
 export const combosAPI = {
-  getAllPublic: () => api.get('/admin/combos/get'), // could be moved to public route later
+  getAllPublic: () => api.get('/shop/combos/get'),
+  getById: (idOrSlug: string) => api.get(`/shop/combos/get/${idOrSlug}`),
   getAllAdmin: () => api.get('/admin/combos/get'),
   create: (data: any) => api.post('/admin/combos/add', data),
   update: (id: string, data: any) => api.put(`/admin/combos/edit/${id}`, data),
@@ -137,10 +138,21 @@ export const combosAPI = {
 
 // Team API
 export const teamAPI = {
+  getAllAdmin: () => api.get('/admin/team/get'),
+  getAllPublic: () => api.get('/common/team/get'),
   getAll: () => api.get('/admin/team/get'),
   create: (data: any) => api.post('/admin/team/add', data),
   update: (id: string, data: any) => api.put(`/admin/team/edit/${id}`, data),
   delete: (id: string) => api.delete(`/admin/team/delete/${id}`),
+};
+
+// Slider API
+export const sliderAPI = {
+  getAllPublic: () => api.get('/common/slider/get'),
+  getAllAdmin: () => api.get('/admin/sliders/get'),
+  create: (data: any) => api.post('/admin/sliders/add', data),
+  update: (id: string, data: any) => api.put(`/admin/sliders/edit/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/sliders/delete/${id}`),
 };
 
 
