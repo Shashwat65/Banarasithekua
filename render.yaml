@@ -1,53 +1,47 @@
 services:
   - type: web
-    name: banarasithekua-server
+    name: banarasithekua
     env: node
     region: singapore
     plan: free
-    buildCommand: cd server && npm install
-    startCommand: cd server && npm start
+    buildCommand: bash build.sh
+    startCommand: cd server && node server.js
     healthCheckPath: /api/shop/products/get
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: MONGODB_URI
         sync: false
-      - key: CLIENT_SECRET_KEY
+      - key: JWT_SECRET
         sync: false
       - key: FRONTEND_URL
         sync: false
+      # PhonePe Standard Checkout API
+      - key: PHONEPE_ENV
+        value: sandbox
+      - key: PHONEPE_CLIENT_ID
+        sync: false
+      - key: PHONEPE_CLIENT_SECRET
+        sync: false
+      - key: PHONEPE_CLIENT_VERSION
+        value: 1
       - key: PHONEPE_MERCHANT_ID
         sync: false
-      - key: PHONEPE_MERCHANT_KEY
+      - key: PHONEPE_WEBHOOK_USER
         sync: false
-      - key: PHONEPE_ENV
-        value: production
+      - key: PHONEPE_WEBHOOK_PASSWORD
+        sync: false
+      - key: PHONEPE_CALLBACK_URL
+        sync: false
+      # Cloudinary (optional)
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
-
-  - type: web
-    name: banarasithekua-client
-    env: static
-    region: singapore
-    buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/dist
-    pullRequestPreviewsEnabled: false
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: SAMEORIGIN
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /assets/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable
-    routes:
-      - type: rewrite
         source: /*
         destination: /index.html
     envVars:
