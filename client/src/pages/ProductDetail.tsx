@@ -43,7 +43,12 @@ const mapProduct = (product: any) => {
         : typeof product.stock === "number"
           ? product.stock
           : undefined,
-    categoryName: product.categoryName || product.category || null,
+    categoryName:
+      product.categoryName ||
+      (typeof product.category === "object" && product.category !== null
+        ? product.category.name
+        : product.category) ||
+      null,
     weight: product.weight || product.packSize || product.size,
   };
 };

@@ -1,7 +1,7 @@
 import { Menu, Search, ShoppingCart, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ganeshaMark from "@/assets/ganesha-mark.svg";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -224,23 +224,7 @@ const Header = () => {
     </div>
   );
 
-  const scrollToSection = (sectionId: string) => {
-    const doScroll = () => {
-      const el = document.getElementById(sectionId);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    };
-    const hashUrl = `/#${sectionId}`;
-    if (location.pathname !== "/") {
-      navigate(hashUrl, { replace: false });
-    } else {
-      if (location.hash !== `#${sectionId}`) {
-        navigate(hashUrl, { replace: false });
-      }
-      requestAnimationFrame(doScroll);
-    }
-  };
+  const buildSectionLink = (sectionId: string) => `/#${sectionId}`;
 
   return (
     <header className="border-b border-border/70 bg-background/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
@@ -264,14 +248,26 @@ const Header = () => {
                 </SheetHeader>
                 <nav className="mt-6 flex flex-col gap-1 text-secondary/80 text-sm">
                   {NAV_LINKS.map((item) => (
-                    <button
+                    <Link
                       key={item.section}
-                      onClick={() => scrollToSection(item.section)}
+                      to={buildSectionLink(item.section)}
                       className="text-left rounded-lg px-3 py-2 hover:bg-secondary/10 transition focus:outline-none focus:ring-2 focus:ring-primary/30"
                     >
                       {item.label}
-                    </button>
+                    </Link>
                   ))}
+                  <Link
+                    to="/products"
+                    className="text-left rounded-lg px-3 py-2 hover:bg-secondary/10 transition focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  >
+                    All Products
+                  </Link>
+                  <Link
+                    to="/combos"
+                    className="text-left rounded-lg px-3 py-2 hover:bg-secondary/10 transition focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  >
+                    Combos
+                  </Link>
                 </nav>
                 <div className="mt-8 grid gap-3 text-sm">
                   {user ? (
@@ -326,14 +322,26 @@ const Header = () => {
 
           <nav className="hidden lg:flex items-center text-sm font-medium tracking-wide text-secondary/75 gap-8 xl:gap-10">
             {NAV_LINKS.map((item) => (
-              <button
+              <Link
                 key={item.section}
-                onClick={() => scrollToSection(item.section)}
+                to={buildSectionLink(item.section)}
                 className="relative transition hover:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-md px-1"
               >
                 {item.label}
-              </button>
+              </Link>
             ))}
+            <Link
+              to="/products"
+              className="relative transition hover:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-md px-1"
+            >
+              All Products
+            </Link>
+            <Link
+              to="/combos"
+              className="relative transition hover:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-md px-1"
+            >
+              Combos
+            </Link>
           </nav>
 
           {desktopActions}

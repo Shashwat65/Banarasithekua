@@ -36,11 +36,15 @@ type Product = {
 };
 type Order = {
   _id: string;
-  orderStatus: string;
-  totalPrice: number;
+  orderStatus?: string;
+  totalPrice?: number;
+  totalAmount?: number;
   user?: { name?: string; email?: string } | string;
-  orderItems: { product: string | { name: string }; name?: string; quantity: number }[];
+  userId?: string;
+  orderItems?: { product: string | { name: string }; name?: string; quantity: number }[];
+  cartItems?: { productId?: string; title?: string; name?: string; quantity: number }[];
   isPaid?: boolean;
+  paymentStatus?: string;
 };
 
 type ImageItem = { _id?: string; url: string; public_id?: string; width?: number; height?: number; uploadedAt?: string; active?: boolean; sortOrder?: number };
@@ -838,37 +842,49 @@ export default function Admin() {
                   <p className="text-muted-foreground">No orders yet.</p>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div key={order._id} className="border border-border/60 rounded-xl p-4 space-y-2">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                          <div>
-                            <p className="font-semibold">Order #{order._id}</p>
-                            <p className="text-xs text-muted-foreground">{(order.user as any)?.name} • {(order.user as any)?.email}</p>
+                    {orders.map((order) => {
+                      const orderItems = order.orderItems || order.cartItems || [];
+                      const total = typeof order.totalPrice !== 'undefined'
+                        ? order.totalPrice
+                        : typeof order.totalAmount !== 'undefined'
+                          ? order.totalAmount
+                          : 0;
+                      const paymentText = typeof order.isPaid !== 'undefined'
+                        ? (order.isPaid ? 'paid' : 'unpaid')
+                        : order.paymentStatus || 'unpaid';
+                      const userLabel = (order.user as any)?.email || (order.user as any)?.name || order.userId || 'Guest';
+                      return (
+                        <div key={order._id} className="border border-border/60 rounded-xl p-4 space-y-2">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                            <div>
+                              <p className="font-semibold">Order #{order._id}</p>
+                              <p className="text-xs text-muted-foreground">{userLabel}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Select value={order.orderStatus || 'pending'} onValueChange={(value) => updateOrderStatus(order._id, value)}>
+                                <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                                  <SelectItem value="processing">Processing</SelectItem>
+                                  <SelectItem value="shipped">Shipped</SelectItem>
+                                  <SelectItem value="delivered">Delivered</SelectItem>
+                                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <span className="text-xs text-muted-foreground">Payment: {paymentText}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Select value={order.orderStatus} onValueChange={(value) => updateOrderStatus(order._id, value)}>
-                              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="confirmed">Confirmed</SelectItem>
-                                <SelectItem value="processing">Processing</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <span className="text-xs text-muted-foreground">Payment: {order.isPaid ? "paid" : "unpaid"}</span>
-                          </div>
+                          <ul className="text-sm text-muted-foreground">
+                            {orderItems.map((item, idx) => {
+                              const name = (item as any).name || (item as any).title || (item as any).product?.name || "Item";
+                              return (<li key={idx}>{name} × {item.quantity}</li>);
+                            })}
+                          </ul>
+                          <p className="text-sm font-semibold">Total: ₹{Number(total || 0).toFixed(2)}</p>
                         </div>
-                        <ul className="text-sm text-muted-foreground">
-                          {order.orderItems.map((item, idx) => {
-                            const name = (item as any).name || (item.product as any)?.name || "Item";
-                            return (<li key={idx}>{name} × {item.quantity}</li>);
-                          })}
-                        </ul>
-                        <p className="text-sm font-semibold">Total: ₹{Number(order.totalPrice || 0).toFixed(2)}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
