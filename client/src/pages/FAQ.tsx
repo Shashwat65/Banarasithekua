@@ -1,28 +1,31 @@
-import { Link } from "react-router-dom";
+const FAQ = () => {
+  const faqs = [
+    { q: "Where do you ship?", a: "We ship across India." },
+    { q: "How long does delivery take?", a: "Typically 3-7 business days depending on location." },
+    { q: "Do you accept returns?", a: "Due to perishability, returns are not accepted. Contact us for any issues." },
+    { q: "Are your products vegetarian?", a: "Yes, all our products are vegetarian." },
+  ];
 
-const faqs: { q: string; a: string }[] = [
-  { q: "What is Thekua?", a: "A traditional festive sweet made with wheat flour, jaggery and ghee, slow-fried for caramelised depth." },
-  { q: "Do you ship nationwide?", a: "Yes, we dispatch across India with hygienic packaging and freshness protection." },
-  { q: "Shelf life?", a: "Best consumed within 15 days in an airtight container away from moisture and heat." },
-  { q: "Do you use preservatives?", a: "No added preservatives; micro-batch preparation ensures natural shelf life." },
-  { q: "Payment methods?", a: "PhonePe (UPI/cards/wallet) and COD (coming soon)." },
-];
-
-export default function FAQ() {
   return (
-    <div className="container mx-auto px-6 py-16 max-w-4xl">
-      <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-semibold tracking-tight">Frequently Asked Questions</h1>
-        <Link to="/" className="text-sm underline text-secondary/60 hover:text-secondary">Home</Link>
-      </div>
-      <div className="space-y-8">
-        {faqs.map((f) => (
-          <div key={f.q} className="space-y-2">
-            <h2 className="text-lg font-medium text-secondary">{f.q}</h2>
-            <p className="text-sm text-secondary/70 leading-relaxed">{f.a}</p>
-          </div>
-        ))}
+    <div className="min-h-screen bg-muted/10 py-16">
+      <div className="container mx-auto px-6 max-w-3xl space-y-8">
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.5em] text-secondary/50">Support</p>
+          <h1 className="text-3xl font-semibold text-secondary">Frequently Asked Questions</h1>
+          <p className="text-secondary/70">Answers to the most common questions about our products and services.</p>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((item, idx) => (
+            <div key={idx} className="rounded-2xl border bg-card p-5">
+              <h3 className="font-medium text-secondary">{item.q}</h3>
+              <p className="text-sm text-muted-foreground mt-2">{item.a}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default FAQ;

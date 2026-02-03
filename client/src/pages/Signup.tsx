@@ -1,81 +1,65 @@
-import { useState, type FormEvent } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
-export default function Signup() {
-  const { signup, login } = useAuth();
-  const nav = useNavigate();
-  const location = useLocation();
+const Signup = () => {
+  const { signup } = useAuth();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
-      toast("Please fill in all required fields");
-      return;
-    }
-
     setLoading(true);
     const result = await signup(name, email, password);
-    if (result.ok) {
-      toast(result.message || "Registration successful");
-      const loggedIn = await login(email, password);
-      setLoading(false);
-      if (loggedIn) {
-        const from = (location.state as { from?: string } | null)?.from;
-        const fallback = loggedIn.role === "admin" ? "/admin" : "/";
-        nav(from || fallback, { replace: true });
-      } else {
-        nav("/login");
-      }
-    } else {
-      setLoading(false);
-      toast(result.error || "Failed to sign up");
+    setLoading(false);
+    if (!result.ok) {
+      toast("Signup failed", { description: result.error || "Please try again." });
+      return;
     }
+    toast("Account created", { description: "Please sign in to continue." });
+    navigate("/login");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold">Create account</h1>
-        <Input
-          placeholder="Full Name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <Input
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Input
-          placeholder="Password (min 6 characters)"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
-        />
-        <Button disabled={loading} type="submit" className="w-full">
-          {loading ? "Creating…" : "Sign up"}
-        </Button>
-        <div className="text-sm text-muted-foreground">
-          Have an account? <Link to="/login" className="underline">Login</Link>
-        </div>
-        <div className="pt-2 text-center">
-          <Link to="/" className="text-xs text-secondary/60 hover:text-secondary underline">← Back to home</Link>
-        </div>
-      </form>
+    <div className="min-h-screen bg-muted/20 flex items-center justify-center px-6 py-16">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Create account</CardTitle>
+          <CardDescription>Join Banarasi Thekua to track orders and manage your cart.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full name</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Creating..." : "Create account"}
+            </Button>
+          </form>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Already have an account? <Link to="/login" className="underline">Sign in</Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default Signup;

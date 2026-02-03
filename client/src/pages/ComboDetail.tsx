@@ -1,163 +1,136 @@
-import { useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/hooks/useCart";
-import { toast } from "sonner";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { combosAPI } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
-const fetchCombo = async (idOrSlug: string) => {
-  try {
-    const res = await combosAPI.getById(idOrSlug);
-    return res.data?.data ?? null;
-  } catch (error: any) {
-    if (error?.response?.status === 404) {
-      return null;
-    }
-    throw error;
-  }
-};
-
-export default function ComboDetail() {
-  const { slug } = useParams<{ slug: string }>();
+const ComboDetail = () => {
+  const { slug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { addItem } = useCart();
+  const { user } = useAuth();
 
   const { data, isLoading } = useQuery({
     queryKey: ["combo", slug],
-    queryFn: () => fetchCombo(slug || ""),
     enabled: Boolean(slug),
-    retry: false,
+    queryFn: async () => {
+      const res = await combosAPI.getById(slug as string);
+      return res.data?.data || null;
+    },
   });
 
-  const combo = useMemo(() => {
-    if (!data) return null;
-    const id = data._id || data.id;
-    const image = data.image || data.images?.[0]?.url || data.productIds?.[0]?.image;
-    return {
-      ...data,
-      id,
-      image,
-      slug: data.slug || id,
-      name: data.name || "Combo",
-      price: typeof data.price === "number" ? data.price : Number(data.price || 0),
-      originalPrice: data.originalPrice ? Number(data.originalPrice) : undefined,
-      items: Array.isArray(data.productIds) ? data.productIds : Array.isArray(data.products) ? data.products : [],
-    };
-  }, [data]);
+  const combo = data;
 
-  const handleAddToCart = () => {
-    if (!combo) return;
-    addItem({
-      id: combo.id,
-      slug: combo.slug,
-      name: combo.name,
-      price: combo.price,
-      quantity: 1,
-      image: combo.image,
+  const ensureAuth = (redirect?: string) => {
+    if (user) return true;
+    toast("Please sign in to continue", {
+      description: "Login or create an account to add items to your cart.",
     });
-    toast(`${combo.name} added to cart`);
+    const target = redirect || `${location.pathname}${location.search}`;
+    navigate("/login", { state: { from: target } });
+    return false;
+  };
+
+  const handleAdd = () => {
+    if (!combo) return;
+    if (!ensureAuth()) return;
+    const id = combo._id || combo.id;
+    addItem({
+      id,
+      slug: combo.slug || id,
+      name: combo.name || "Combo",
+      price: Number(combo.price || 0),
+      image: combo.image || combo.products?.[0]?.image || combo.products?.[0]?.images?.[0]?.url || undefined,
+      quantity: 1,
+    });
+    toast("Combo added to cart", { description: combo.name });
+  };
+
+  const handleBuy = () => {
+    if (!combo) return;
+    if (!ensureAuth("/checkout")) return;
+    handleAdd();
+    navigate("/checkout");
   };
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+    return <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground">Loading...</div>;
   }
 
   if (!combo) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-center px-4">
-        <p className="text-lg font-semibold">Combo not found.</p>
-        <Link to="/products">
-          <Button>Back to catalog</Button>
-        </Link>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center gap-4">
+        <p className="text-muted-foreground">Combo not found.</p>
+        <Button asChild variant="outline"><Link to="/combos">Back to combos</Link></Button>
       </div>
     );
   }
 
-  const savings = combo.originalPrice
-    ? Math.max(0, combo.originalPrice - combo.price)
-    : 0;
+  const image = combo.image || combo.products?.[0]?.image || combo.products?.[0]?.images?.[0]?.url;
+  const price = Number(combo.price || 0);
+  const originalPrice = combo.originalPrice ? Number(combo.originalPrice) : null;
 
   return (
-    <div className="bg-background min-h-screen">
-      <div className="container mx-auto px-6 py-16 grid gap-12 lg:grid-cols-2">
-        <div className="lg:col-span-2 mb-4 flex justify-between items-center">
-          <Button
-            variant="ghost"
-            className="px-3"
-            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/products"))}
-          >
-            ← Back
-          </Button>
-          <Link to="/cart" className="text-sm underline text-secondary/70 hover:text-secondary">View Cart</Link>
-        </div>
-        <div className="relative">
-          {combo.image ? (
-            <img
-              src={combo.image}
-              alt={combo.name}
-              className="w-full rounded-3xl shadow-xl"
-            />
-          ) : (
-            <div className="h-[480px] rounded-3xl bg-muted flex items-center justify-center">
-              No image available
-            </div>
-          )}
-          {combo.originalPrice && combo.originalPrice > combo.price ? (
-            <Badge className="absolute top-6 left-6 bg-accent text-accent-foreground">
-              Save ₹{savings}
-            </Badge>
-          ) : null}
+    <div className="min-h-screen bg-muted/10 py-16">
+      <div className="container mx-auto px-6">
+        <div className="mb-6 text-sm text-muted-foreground">
+          <Link to="/" className="hover:underline">Home</Link> / <Link to="/combos" className="hover:underline">Combos</Link> / {combo.name}
         </div>
 
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Link to="/products" className="text-sm text-secondary/60 hover:text-secondary">
-              ← Back to all products
-            </Link>
-            <h1 className="text-4xl font-semibold text-secondary">{combo.name}</h1>
-            <p className="text-secondary/70 leading-relaxed text-base">
-              {combo.description || "Curated combo featuring our most loved thekua flavours."}
-            </p>
+        <div className="grid gap-10 lg:grid-cols-2">
+          <div>
+            {image ? (
+              <div className="rounded-3xl overflow-hidden bg-white shadow">
+                <img src={image} alt={combo.name} className="w-full h-[460px] object-cover" />
+              </div>
+            ) : (
+              <div className="rounded-3xl bg-muted h-[460px] flex items-center justify-center text-muted-foreground">No image</div>
+            )}
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-end gap-4">
-              <span className="text-3xl font-semibold text-primary">₹{combo.price.toFixed(2)}</span>
-              {combo.originalPrice && combo.originalPrice > combo.price ? (
-                <span className="text-lg text-secondary/50 line-through">
-                  ₹{combo.originalPrice.toFixed(2)}
-                </span>
-              ) : null}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.4em] text-secondary/60">COMBO</p>
+              <h1 className="text-4xl font-semibold text-secondary">{combo.name}</h1>
+              <p className="text-secondary/70">{combo.description || "A curated combo of our best sellers."}</p>
             </div>
-            <p className="text-sm uppercase tracking-[0.35em] text-secondary/60">Combo Pack</p>
-          </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button
-              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-              onClick={handleAddToCart}
-            >
-              Add Combo to Cart
-            </Button>
-          </div>
-
-          {combo.items.length > 0 ? (
-            <div className="border border-border/60 rounded-2xl p-6 space-y-3 text-sm text-secondary/70">
-              <p className="text-xs uppercase tracking-[0.3em] text-secondary/50">Included Items</p>
-              <ul className="space-y-2">
-                {combo.items.map((item: any) => (
-                  <li key={item._id || item.id} className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-secondary/80">{item.name || item.title || "Item"}</span>
-                    {item.price ? <span>₹{Number(item.price).toFixed(0)}</span> : null}
-                  </li>
-                ))}
-              </ul>
+            <div className="flex items-center gap-3">
+              <span className="text-3xl font-semibold text-primary">₹{price.toFixed(0)}</span>
+              {originalPrice && originalPrice > price && (
+                <span className="text-sm line-through text-secondary/40">₹{originalPrice.toFixed(0)}</span>
+              )}
             </div>
-          ) : null}
+
+            <Separator />
+
+            {Array.isArray(combo.products) && combo.products.length > 0 && (
+              <div className="rounded-2xl bg-card p-4">
+                <p className="text-sm font-medium text-secondary mb-3">Included Items</p>
+                <ul className="space-y-2 text-sm text-secondary/70">
+                  {combo.products.map((item: any, idx: number) => (
+                    <li key={idx} className="flex items-center justify-between">
+                      <span>{item.name || item.title || "Item"}</span>
+                      <span className="text-muted-foreground">{item.weight || item.packSize || "500g"}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button className="flex-1" onClick={handleAdd}>Add to Cart</Button>
+              <Button className="flex-1" variant="secondary" onClick={handleBuy}>Buy Now</Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ComboDetail;

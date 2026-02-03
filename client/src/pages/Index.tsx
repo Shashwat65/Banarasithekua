@@ -9,11 +9,9 @@ const Index = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // If navigated with state.scrollTarget from Header, perform delayed scroll
     const state = location.state as any;
     if (state?.scrollTarget) {
       const target = state.scrollTarget as string;
-      // Clear the state scroll target to avoid re-scrolling on other navigations
       history.replaceState({ ...history.state, usr: { ...history.state?.usr, scrollTarget: undefined } }, "");
       setTimeout(() => {
         const el = document.getElementById(target);
@@ -23,12 +21,12 @@ const Index = () => {
   }, [location]);
 
   useEffect(() => {
-    const hash = location.hash ? location.hash.replace('#', '') : '';
+    const hash = location.hash ? location.hash.replace("#", "") : "";
     if (!hash) return;
     const el = document.getElementById(hash);
     if (!el) return;
     setTimeout(() => {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   }, [location.hash]);
 
@@ -40,14 +38,12 @@ const Index = () => {
       <section id="products">
         <ProductGrid />
       </section>
-      {/* Combo section hidden for now */}
       <section id="values">
         <CoreValues />
       </section>
       <section id="story">
         <Story />
       </section>
-      {/* Footer provided globally via Layout */}
     </div>
   );
 };
