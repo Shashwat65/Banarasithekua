@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,9 @@ type ImageItem = { _id?: string; url: string; public_id?: string; width?: number
 type AdminUser = { _id: string; name: string; email: string; role: "user" | "admin" };
 
 export default function Admin() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { section } = useParams<{ section?: string }>();
   const { user, logout } = useAuth();
   const [cats, setCats] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -78,7 +82,15 @@ export default function Admin() {
   const [slugEdited, setSlugEdited] = useState(false);
   const [bootstrap, setBootstrap] = useState({ email: "", password: "", adminSecret: "" });
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
-  const [active, setActive] = useState<"dashboard" | "products" | "orders" | "categories" | "combos" | "team" | "images" | "slider" | "users">("dashboard");
+  const normalizeSection = (value?: string) => {
+    const allowed = ["dashboard", "products", "orders", "categories", "combos", "team", "images", "slider", "users"] as const;
+    if (!value) return "dashboard";
+    return (allowed.includes(value as any) ? value : "dashboard") as typeof allowed[number];
+  };
+
+  const [active, setActive] = useState<"dashboard" | "products" | "orders" | "categories" | "combos" | "team" | "images" | "slider" | "users">(
+    normalizeSection(section)
+  );
   // Combos state
   const [combos, setCombos] = useState<any[]>([]);
   const [comboForm, setComboForm] = useState({ name: "", slug: "", description: "", price: "", originalPrice: "", productIds: "", active: true });
@@ -185,6 +197,21 @@ export default function Admin() {
     loadTeam();
     loadSliderImages();
   }, [user]);
+
+  useEffect(() => {
+    const next = normalizeSection(section);
+    if (next !== active) {
+      setActive(next);
+    }
+  }, [section]);
+
+  const goToSection = (tab: typeof active) => {
+    setActive(tab);
+    const path = tab === "dashboard" ? "/admin" : `/admin/${tab}`;
+    if (location.pathname !== path) {
+      navigate(path);
+    }
+  };
 
   const submitCategory = async (e: FormEvent) => {
     e.preventDefault();
@@ -450,31 +477,31 @@ export default function Admin() {
             Admin Panel
           </div>
           <nav className="space-y-1">
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='dashboard'?'bg-muted':''}`} onClick={() => setActive('dashboard')}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='dashboard'?'bg-muted':''}`} onClick={() => goToSection('dashboard')}>
               <LayoutDashboard className="h-4 w-4" /> Dashboard
             </button>
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='products'?'bg-muted':''}`} onClick={() => setActive('products')}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='products'?'bg-muted':''}`} onClick={() => goToSection('products')}>
               <ShoppingBasket className="h-4 w-4" /> Products
             </button>
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='orders'?'bg-muted':''}`} onClick={() => setActive('orders')}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='orders'?'bg-muted':''}`} onClick={() => goToSection('orders')}>
               <Package className="h-4 w-4" /> Orders
             </button>
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='categories'?'bg-muted':''}`} onClick={() => setActive('categories')}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='categories'?'bg-muted':''}`} onClick={() => goToSection('categories')}>
               <Layers className="h-4 w-4" /> Categories
             </button>
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='combos'?'bg-muted':''}`} onClick={() => setActive('combos')}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='combos'?'bg-muted':''}`} onClick={() => goToSection('combos')}>
               <ShoppingBasket className="h-4 w-4" /> Combos
             </button>
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='team'?'bg-muted':''}`} onClick={() => setActive('team')}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='team'?'bg-muted':''}`} onClick={() => goToSection('team')}>
               <Users className="h-4 w-4" /> Team
             </button>
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='users'?'bg-muted':''}`} onClick={() => { setActive('users'); if (users.length === 0) loadUsers(); }}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='users'?'bg-muted':''}`} onClick={() => { goToSection('users'); if (users.length === 0) loadUsers(); }}>
               <Users className="h-4 w-4" /> Users
             </button>
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='images'?'bg-muted':''}`} onClick={() => setActive('images')}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='images'?'bg-muted':''}`} onClick={() => goToSection('images')}>
               <Images className="h-4 w-4" /> Image Gallery
             </button>
-            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='slider'?'bg-muted':''}`} onClick={() => setActive('slider')}>
+            <button className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-3 hover:bg-muted ${active==='slider'?'bg-muted':''}`} onClick={() => goToSection('slider')}>
               <Images className="h-4 w-4" /> Slider Images
             </button>
           </nav>

@@ -76,6 +76,14 @@ const App = () => (
                   </RequireAdmin>
                 }
               />
+              <Route
+                path="/admin/:section"
+                element={
+                  <RequireAdmin>
+                    <Admin />
+                  </RequireAdmin>
+                }
+              />
               <Route path="/products" element={<Layout><Products /></Layout>} />
               <Route path="/products/:slug" element={<Layout><ProductDetail /></Layout>} />
               <Route path="/combos" element={<Layout><Combos /></Layout>} />
