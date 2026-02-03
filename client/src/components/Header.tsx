@@ -231,11 +231,13 @@ const Header = () => {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     };
+    const hashUrl = `/#${sectionId}`;
     if (location.pathname !== "/") {
-      // Navigate home, then scroll after mount
-      navigate("/", { state: { scrollTarget: sectionId } });
+      navigate(hashUrl, { replace: false });
     } else {
-      // Already on home; slight delay to allow layout
+      if (location.hash !== `#${sectionId}`) {
+        navigate(hashUrl, { replace: false });
+      }
       requestAnimationFrame(doScroll);
     }
   };
