@@ -120,9 +120,7 @@ class PhonePeHelper {
 // Create and export singleton instance
 const phonePeHelper = new PhonePeHelper();
 
-// Validate configuration
-if (!phonePeHelper.merchantId || !phonePeHelper.saltKey) {
-  console.warn('PhonePe not configured properly. Check PHONEPE_MERCHANT_ID and PHONEPE_SALT_KEY environment variables.');
-}
+// Legacy PhonePe - Standard Checkout API is used in production (see phonepe-standard.js)
+// Validation removed to avoid confusion
 
 module.exports = phonePeHelper;
