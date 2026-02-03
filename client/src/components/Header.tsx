@@ -262,12 +262,6 @@ const Header = () => {
                   >
                     All Products
                   </Link>
-                  <Link
-                    to="/combos"
-                    className="text-left rounded-lg px-3 py-2 hover:bg-secondary/10 transition focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  >
-                    Combos
-                  </Link>
                 </nav>
                 <div className="mt-8 grid gap-3 text-sm">
                   {user ? (
@@ -335,12 +329,6 @@ const Header = () => {
               className="relative transition hover:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-md px-1"
             >
               All Products
-            </Link>
-            <Link
-              to="/combos"
-              className="relative transition hover:text-secondary focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-md px-1"
-            >
-              Combos
             </Link>
           </nav>
 
