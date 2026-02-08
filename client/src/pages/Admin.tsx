@@ -183,13 +183,132 @@ const Admin = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm("Delete this product?")) return;
     try {
       await productsAPI.delete(id);
       toast("Product deleted");
       await queryClient.invalidateQueries({ queryKey: ["admin-products"] });
     } catch (error: any) {
       toast("Delete failed", { description: error?.response?.data?.message || "Please try again." });
+    }
+  };
+
+  // Category handlers
+  const handleAddCategory = async () => {
+    if (!categoryName.trim()) {
+      toast("Category name is required");
+      return;
+    }
+    setAddingCategory(true);
+    try {
+      const res = await categoriesAPI.create({ name: categoryName.trim() });
+      if (res.data?.success) {
+        toast("Category added");
+        setCategoryName("");
+        await queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      } else {
+        toast("Unable to add category", { description: res.data?.message || "Try again" });
+      }
+    } catch (error: any) {
+      toast("Failed to add category", { description: error?.response?.data?.message || "Try again" });
+    } finally {
+      setAddingCategory(false);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!confirm("Delete this category? Products using it will not be affected.")) return;
+    try {
+      await categoriesAPI.delete(id);
+      toast("Category deleted");
+      await queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+    } catch (error: any) {
+      toast("Delete failed", { description: error?.response?.data?.message || "Try again" });
+    }
+  };
+
+  // Slider handlers
+  const handleSliderImageUpload = async () => {
+    if (!sliderFile) {
+      toast("Select an image first");
+      return;
+    }
+    setUploadingSlider(true);
+    try {
+      const data = new FormData();
+      data.append("my_file", sliderFile);
+      const res = await uploadAPI.uploadImage(data);
+      if (res.data?.success && res.data?.data?.url) {
+        setSliderImage(res.data.data.url);
+        toast("Image uploaded");
+      }
+    } catch (error: any) {
+      toast("Upload failed", { description: error?.response?.data?.message || "Try again" });
+    } finally {
+      setUploadingSlider(false);
+    }
+  };
+
+  const handleAddSlider = async () => {
+    if (!sliderImage) {
+      toast("Upload an image first");
+      return;
+    }
+    try {
+      const payload = {
+        image: sliderImage,
+        title: sliderTitle || undefined,
+        description: sliderDescription || undefined,
+        order: sliderOrder ? Number(sliderOrder) : undefined,
+      };
+      const res = await sliderAPI.create(payload);
+      if (res.data?.success) {
+        toast("Slider added");
+        setSliderImage("");
+        setSliderTitle("");
+        setSliderDescription("");
+        setSliderOrder("");
+        setSliderFile(null);
+        await queryClient.invalidateQueries({ queryKey: ["admin-sliders"] });
+      } else {
+        toast("Failed to add slider", { description: res.data?.message || "Try again" });
+      }
+    } catch (error: any) {
+      toast("Failed to add slider", { description: error?.response?.data?.message || "Try again" });
+    }
+  };
+
+  const handleDeleteSlider = async (id: string) => {
+    if (!confirm("Delete this slider image?")) return;
+    try {
+      await sliderAPI.delete(id);
+      toast("Slider deleted");
+      await queryClient.invalidateQueries({ queryKey: ["admin-sliders"] });
+    } catch (error: any) {
+      toast("Delete failed", { description: error?.response?.data?.message || "Try again" });
+    }
+  };
+
+  // Order handlers
+  const handleUpdateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      await ordersAPI.updateStatus(orderId, { orderStatus: status });
+      toast("Order status updated");
+      await queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+    } catch (error: any) {
+      toast("Update failed", { description: error?.response?.data?.message || "Try again" });
+    }
+  };
+
+  const handleDeleteOrder = async (id: string) => {
+    if (!confirm("Delete this order?")) return;
+    try {
+      await ordersAPI.delete(id);
+      toast("Order deleted");
+      await queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+    } catch (error: any) {
+      toast("Delete failed", { description: error?.response?.data?.message || "Try again" });
     }
   };
 
@@ -210,20 +329,22 @@ const Admin = () => {
           ))}
         </div>
 
-        {active !== "products" && (
+        {/* Dashboard */}
+        {active === "dashboard" && (
           <Card>
             <CardHeader>
-              <CardTitle>{current.label}</CardTitle>
-              <CardDescription>{current.description}</CardDescription>
+              <CardTitle>Dashboard Overview</CardTitle>
+              <CardDescription>Store metrics and quick stats.</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                This section is ready to connect with admin workflows. Use the backend API endpoints to load, create, and manage records.
+                Dashboard metrics coming soon. Navigate to other sections to manage your store.
               </p>
             </CardContent>
           </Card>
         )}
 
+        {/* Products Section */}
         {active === "products" && (
           <div className="grid gap-8 lg:grid-cols-3">
             <Card className="lg:col-span-2">
@@ -279,14 +400,20 @@ const Admin = () => {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <Input type="file" multiple onChange={(e) => setSelectedFiles(e.target.files)} />
                     <Button type="button" variant="outline" onClick={handleUpload} disabled={uploading}>
-                      {uploading ? "Uploading..." : "Upload"}
+                      {uploading ? "Uploading..." : <><Upload className="h-4 w-4 mr-2" />Upload</>}
                     </Button>
                   </div>
                   {images.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {images.map((img, idx) => (
-                        <div key={`${img.url}-${idx}`} className="rounded-lg overflow-hidden border">
+                        <div key={`${img.url}-${idx}`} className="relative rounded-lg overflow-hidden border">
                           <img src={img.url} alt={`Uploaded ${idx + 1}`} className="h-24 w-full object-cover" />
+                          <button
+                            onClick={() => setImages(images.filter((_, i) => i !== idx))}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -295,7 +422,7 @@ const Admin = () => {
 
                 <div className="flex gap-3">
                   <Button onClick={handleSaveProduct} disabled={saving}>
-                    {saving ? "Saving..." : "Add product"}
+                    {saving ? "Saving..." : <><Plus className="h-4 w-4 mr-2" />Add product</>}
                   </Button>
                 </div>
               </CardContent>
