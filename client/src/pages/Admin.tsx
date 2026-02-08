@@ -442,18 +442,228 @@ const Admin = () => {
                 )}
                 {Array.isArray(productsData) && productsData.map((product: any) => (
                   <div key={product._id} className="rounded-xl border p-3 space-y-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="font-medium text-secondary">{product.name}</p>
                         <p className="text-xs text-muted-foreground">₹{Number(product.price || 0).toFixed(0)}</p>
                       </div>
-                      <Button variant="ghost" onClick={() => handleDelete(product._id)}>Delete</Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product._id)}>
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
                     </div>
                   </div>
                 ))}
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {/* Categories Section */}
+        {active === "categories" && (
+          <div className="grid gap-8 lg:grid-cols-3">
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Add Category</CardTitle>
+                <CardDescription>Create a new product category.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="categoryName">Category Name *</Label>
+                  <Input
+                    id="categoryName"
+                    placeholder="e.g. Spices, Ghee, Snacks"
+                    value={categoryName}
+                    onChange={(e) => setCategoryName(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleAddCategory} disabled={addingCategory} className="w-full">
+                  {addingCategory ? "Adding..." : <><Plus className="h-4 w-4 mr-2" />Add Category</>}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>All Categories</CardTitle>
+                <CardDescription>Manage your product categories.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {categoriesLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+                {categories.length === 0 && !categoriesLoading && (
+                  <p className="text-sm text-muted-foreground">No categories yet. Add your first one!</p>
+                )}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {categories.map((cat: any) => (
+                    <div key={cat._id} className="rounded-lg border p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-secondary">{cat.name}</p>
+                        <p className="text-xs text-muted-foreground">Slug: {cat.slug}</p>
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(cat._id)}>
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Sliders Section */}
+        {active === "sliders" && (
+          <div className="grid gap-8 lg:grid-cols-3">
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Add Slider Image</CardTitle>
+                <CardDescription>Upload a new homepage slider image.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sliderFile">Select Image *</Label>
+                  <Input
+                    id="sliderFile"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setSliderFile(e.target.files?.[0] || null)}
+                  />
+                  <Button onClick={handleSliderImageUpload} disabled={uploadingSlider} variant="outline" className="w-full">
+                    {uploadingSlider ? "Uploading..." : <><Upload className="h-4 w-4 mr-2" />Upload Image</>}
+                  </Button>
+                </div>
+                {sliderImage && (
+                  <div className="rounded-lg border overflow-hidden">
+                    <img src={sliderImage} alt="Slider preview" className="w-full h-32 object-cover" />
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="sliderTitle">Title (optional)</Label>
+                  <Input
+                    id="sliderTitle"
+                    placeholder="Slider title"
+                    value={sliderTitle}
+                    onChange={(e) => setSliderTitle(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sliderDescription">Description (optional)</Label>
+                  <Textarea
+                    id="sliderDescription"
+                    placeholder="Slider description"
+                    value={sliderDescription}
+                    onChange={(e) => setSliderDescription(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sliderOrder">Order (optional)</Label>
+                  <Input
+                    id="sliderOrder"
+                    type="number"
+                    placeholder="Display order"
+                    value={sliderOrder}
+                    onChange={(e) => setSliderOrder(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleAddSlider} className="w-full" disabled={!sliderImage}>
+                  <Plus className="h-4 w-4 mr-2" />Add Slider
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Slider Images</CardTitle>
+                <CardDescription>Manage homepage carousel images.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {slidersLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+                {sliders.length === 0 && !slidersLoading && (
+                  <p className="text-sm text-muted-foreground">No sliders yet. Add your first one!</p>
+                )}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {sliders.map((slider: any) => (
+                    <div key={slider._id} className="rounded-lg border overflow-hidden">
+                      <img src={slider.image} alt={slider.title || "Slider"} className="w-full h-40 object-cover" />
+                      <div className="p-3 space-y-2">
+                        {slider.title && <p className="font-medium text-secondary">{slider.title}</p>}
+                        {slider.description && <p className="text-xs text-muted-foreground">{slider.description}</p>}
+                        {slider.order !== undefined && <p className="text-xs text-muted-foreground">Order: {slider.order}</p>}
+                        <Button variant="destructive" size="sm" onClick={() => handleDeleteSlider(slider._id)} className="w-full">
+                          <Trash2 className="h-4 w-4 mr-2" />Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Orders Section */}
+        {active === "orders" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>All Orders</CardTitle>
+              <CardDescription>Manage customer orders and update status.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {ordersLoading && <p className="text-sm text-muted-foreground">Loading orders...</p>}
+              {orders.length === 0 && !ordersLoading && (
+                <p className="text-sm text-muted-foreground">No orders yet.</p>
+              )}
+              {orders.length > 0 && (
+                <div className="space-y-3">
+                  {orders.map((order: any) => (
+                    <div key={order._id} className="rounded-lg border p-4 space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium text-secondary">Order #{order._id?.slice(-8)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {order.addressInfo?.email || "No email"} • ₹{order.totalAmount}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Payment: {order.paymentStatus} • Order: {order.orderStatus}
+                          </p>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteOrder(order._id)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {["pending", "confirmed", "processing", "shipped", "delivered"].map((status) => (
+                          <Button
+                            key={status}
+                            size="sm"
+                            variant={order.orderStatus === status ? "default" : "outline"}
+                            onClick={() => handleUpdateOrderStatus(order._id, status)}
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Team, Users sections - Placeholder */}
+        {(active === "team" || active === "users") && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{current.label}</CardTitle>
+              <CardDescription>{current.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                This section is ready to connect with backend API. Implement CRUD operations as needed.
+              </p>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
