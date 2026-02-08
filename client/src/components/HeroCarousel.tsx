@@ -7,6 +7,7 @@ import jaggeryThekua from "@/assets/jaggery-thekua.jpg";
 import coconutThekua from "@/assets/coconut-thekua.jpg";
 import premiumMixedThekua from "@/assets/premium-mixed-thekua.jpg";
 import { sliderAPI } from "@/services/api";
+import { useQuery } from "@tanstack/react-query";
 
 const defaultSlides = [
   {
@@ -49,26 +50,26 @@ const HERO_INTERVAL = 7000;
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const [sliderImages, setSliderImages] = useState<{ url: string }[]>([]);
-
-  useEffect(() => {
-    (async () => {
+  const { data: sliderData } = useQuery({
+    queryKey: ["sliders", "homepage"],
+    queryFn: async () => {
       try {
         const res = await sliderAPI.getAllPublic();
-        const images = Array.isArray(res.data?.data) ? res.data.data : [];
-        setSliderImages(images.filter((x: any) => x && typeof x.url === "string"));
+        return Array.isArray(res.data?.data) ? res.data.data : [];
       } catch {
-        setSliderImages([]);
+        return [];
       }
-    })();
-  }, []);
+    },
+  });
+
+  const sliderImages = Array.isArray(sliderData) ? sliderData.filter((x: any) => x && (x.url || x.image)) : [];
 
   // Chunk images into groups of 3 to match the layout
   const chunkedSlides = useMemo(() => {
     if (!sliderImages.length) return defaultSlides;
     const chunks: string[][] = [];
     for (let i = 0; i < sliderImages.length; i += 3) {
-      chunks.push(sliderImages.slice(i, i + 3).map((img: any) => img.url));
+      chunks.push(sliderImages.slice(i, i + 3).map((img: any) => img.url || img.image));
     }
     // Build slides from chunks with generic copy
     return chunks.map((images, idx) => ({

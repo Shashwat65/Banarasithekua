@@ -257,10 +257,10 @@ const Admin = () => {
     }
     try {
       const payload = {
-        image: sliderImage,
+        url: sliderImage,
         title: sliderTitle || undefined,
         description: sliderDescription || undefined,
-        order: sliderOrder ? Number(sliderOrder) : undefined,
+        sortOrder: sliderOrder ? Number(sliderOrder) : undefined,
       };
       const res = await sliderAPI.create(payload);
       if (res.data?.success) {
@@ -584,11 +584,11 @@ const Admin = () => {
                 <div className="grid gap-4 sm:grid-cols-2">
                   {sliders.map((slider: any) => (
                     <div key={slider._id} className="rounded-lg border overflow-hidden">
-                      <img src={slider.image} alt={slider.title || "Slider"} className="w-full h-40 object-cover" />
+                      <img src={slider.url || slider.image} alt={slider.title || "Slider"} className="w-full h-40 object-cover" />
                       <div className="p-3 space-y-2">
                         {slider.title && <p className="font-medium text-secondary">{slider.title}</p>}
                         {slider.description && <p className="text-xs text-muted-foreground">{slider.description}</p>}
-                        {slider.order !== undefined && <p className="text-xs text-muted-foreground">Order: {slider.order}</p>}
+                        {slider.sortOrder !== undefined && <p className="text-xs text-muted-foreground">Order: {slider.sortOrder}</p>}
                         <Button variant="destructive" size="sm" onClick={() => handleDeleteSlider(slider._id)} className="w-full">
                           <Trash2 className="h-4 w-4 mr-2" />Delete
                         </Button>
