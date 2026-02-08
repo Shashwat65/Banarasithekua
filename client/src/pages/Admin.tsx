@@ -27,6 +27,7 @@ const Admin = () => {
   const current = sections.find((s) => s.key === active) || sections[0];
   const queryClient = useQueryClient();
 
+  // Product form state
   const [form, setForm] = useState({
     name: "",
     price: "",
@@ -42,6 +43,19 @@ const Admin = () => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Category form state
+  const [categoryName, setCategoryName] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
+
+  // Slider form state
+  const [sliderImage, setSliderImage] = useState("");
+  const [sliderTitle, setSliderTitle] = useState("");
+  const [sliderDescription, setSliderDescription] = useState("");
+  const [sliderOrder, setSliderOrder] = useState("");
+  const [sliderFile, setSliderFile] = useState<File | null>(null);
+  const [uploadingSlider, setUploadingSlider] = useState(false);
+
+  // Fetch products
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ["admin-products"],
     enabled: active === "products",
@@ -51,9 +65,10 @@ const Admin = () => {
     },
   });
 
-  const { data: categoriesData } = useQuery({
+  // Fetch categories
+  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
     queryKey: ["admin-categories"],
-    enabled: active === "products",
+    enabled: active === "products" || active === "categories",
     queryFn: async () => {
       try {
         const res = await categoriesAPI.getAll();
@@ -64,7 +79,37 @@ const Admin = () => {
     },
   });
 
+  // Fetch orders
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+    queryKey: ["admin-orders"],
+    enabled: active === "orders",
+    queryFn: async () => {
+      try {
+        const res = await ordersAPI.getAll();
+        return res.data?.data || [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  // Fetch sliders
+  const { data: slidersData, isLoading: slidersLoading } = useQuery({
+    queryKey: ["admin-sliders"],
+    enabled: active === "sliders",
+    queryFn: async () => {
+      try {
+        const res = await sliderAPI.getAllAdmin();
+        return res.data?.data || [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
   const categories = useMemo(() => Array.isArray(categoriesData) ? categoriesData : [], [categoriesData]);
+  const orders = useMemo(() => Array.isArray(ordersData) ? ordersData : [], [ordersData]);
+  const sliders = useMemo(() => Array.isArray(slidersData) ? slidersData : [], [slidersData]);
 
   const handleChange = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
