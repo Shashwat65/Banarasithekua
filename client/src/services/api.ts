@@ -96,6 +96,7 @@ export const ordersAPI = {
   getMyOrders: (userId: string) => api.get(`/shop/order/list/${userId}`),
   getAll: () => api.get("/admin/orders/get"),
   updateStatus: (id: string, data: any) => api.put(`/admin/orders/update/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/orders/delete/${id}`),
 };
 
 // Payment API

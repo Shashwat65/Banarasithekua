@@ -12,13 +12,11 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Admin from "./pages/Admin";
 import ProductDetail from "./pages/ProductDetail";
-import ComboDetail from "./pages/ComboDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import TrackOrder from "./pages/TrackOrder";
 import Products from "./pages/Products";
-import Combos from "./pages/Combos";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import ReturnsAndShipping from "./pages/ReturnsAndShipping";
@@ -86,8 +84,6 @@ const App = () => (
               />
               <Route path="/products" element={<Layout><Products /></Layout>} />
               <Route path="/products/:slug" element={<Layout><ProductDetail /></Layout>} />
-              <Route path="/combos" element={<Layout><Combos /></Layout>} />
-              <Route path="/combos/:slug" element={<Layout><ComboDetail /></Layout>} />
               <Route path="/cart" element={<Layout><Cart /></Layout>} />
               <Route
                 path="/checkout"
