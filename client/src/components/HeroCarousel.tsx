@@ -138,6 +138,11 @@ const HeroCarousel = () => {
             <div className="absolute -top-8 -right-10 w-40 sm:w-52 opacity-60 rotate-12 pointer-events-none">
               <img src={ganeshaMark} alt="ganesha watermark" className="w-full h-full" />
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Carousel controls */}
       {slides.length > 1 && (
         <div className="absolute inset-x-0 bottom-6 sm:bottom-8 flex items-center justify-between px-6 sm:px-10">
           <Button
@@ -169,12 +174,7 @@ const HeroCarousel = () => {
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
-      )}Click={nextSlide}
-          className="hidden md:flex h-11 w-11 rounded-full bg-white/80 hover:bg-white shadow-lg text-secondary"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </Button>
-      </div>
+      )}
     </section>
   );
 };
