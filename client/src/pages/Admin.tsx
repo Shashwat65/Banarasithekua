@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { categoriesAPI, ordersAPI, productsAPI, sliderAPI, teamAPI, uploadAPI } from "@/services/api";
+import { categoriesAPI, ordersAPI, productsAPI, sliderAPI, teamAPI, uploadAPI, videosAPI, bannersAPI } from "@/services/api";
 import { toast } from "sonner";
 
 const sections = [
@@ -18,6 +18,8 @@ const sections = [
   { key: "categories", label: "Categories", description: "Maintain category structure for product filtering." },
   { key: "team", label: "Team", description: "Manage team members shown on the website." },
   { key: "slider", label: "Slider", description: "Manage homepage slider images." },
+  { key: "banners", label: "Banners", description: "Manage banners for header and other sections." },
+  { key: "videos", label: "Video Reviews", description: "Manage short video reviews feed." },
 ];
 
 type ImageItem = { url: string; public_id?: string; _id?: string };
@@ -40,6 +42,25 @@ type TeamForm = {
   role: string;
   photo: string;
   order: string;
+  active: boolean;
+};
+
+type VideoForm = {
+  title: string;
+  description: string;
+  videoType: 'upload' | 'youtube';
+  videoUrl: string;
+  thumbnailUrl: string;
+  sortOrder: string;
+  active: boolean;
+};
+
+type BannerForm = {
+  title: string;
+  imageUrl: string;
+  link: string;
+  position: 'header' | 'main' | 'sidebar' | 'footer';
+  sortOrder: string;
   active: boolean;
 };
 
@@ -85,6 +106,31 @@ const Admin = () => {
   const [sliderFile, setSliderFile] = useState<FileList | null>(null);
   const [sliderUploading, setSliderUploading] = useState(false);
 
+  const [videoForm, setVideoForm] = useState<VideoForm>({ 
+    title: "", 
+    description: "", 
+    videoType: "youtube", 
+    videoUrl: "", 
+    thumbnailUrl: "", 
+    sortOrder: "0", 
+    active: true 
+  });
+  const [videoFile, setVideoFile] = useState<FileList | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoEditingId, setVideoEditingId] = useState<string | null>(null);
+
+  const [bannerForm, setBannerForm] = useState<BannerForm>({ 
+    title: "", 
+    imageUrl: "", 
+    link: "", 
+    position: "main", 
+    sortOrder: "0", 
+    active: true 
+  });
+  const [bannerFile, setBannerFile] = useState<FileList | null>(null);
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerEditingId, setBannerEditingId] = useState<string | null>(null);
+
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ["admin-products"],
     enabled: active === "products" || active === "dashboard",
@@ -126,6 +172,26 @@ const Admin = () => {
     enabled: active === "slider",
     queryFn: async () => {
       const res = await sliderAPI.getAllAdmin();
+      return res.data?.data || [];
+    },
+  });
+
+  const { data: videosData } = useQuery({
+    queryKey: ["admin-videos"],
+    enabled: active === "videos",
+    queryFn: async () => {
+      const res = await videosAPI.getAllAdmin();
+      return res.data?.data || [];
+    },
+  });
+
+  const { data: bannersData } = useQuery({
+    queryKey: ["admin-banners"],
+  const videos = Array.isArray(videosData) ? videosData : [];
+  const banners = Array.isArray(bannersData) ? bannersData : [];
+    enabled: active === "banners",
+    queryFn: async () => {
+      const res = await bannersAPI.getAllAdmin();
       return res.data?.data || [];
     },
   });
@@ -207,16 +273,11 @@ const Admin = () => {
     }
     setProductSaving(true);
     try {
-      const attributes: Record<string, string> = {};
-      productForm.highlights
+      // Parse highlights from textarea (one per line)
+      const highlights = productForm.highlights
         .split("\n")
         .map((line) => line.trim())
-        .filter(Boolean)
-        .forEach((line) => {
-          const [key, ...rest] = line.split(":");
-          if (!key || rest.length === 0) return;
-          attributes[key.trim()] = rest.join(":").trim();
-        });
+        .filter(Boolean);
 
       const payload = {
         name: productForm.name.trim(),
@@ -228,9 +289,9 @@ const Admin = () => {
         weight: productForm.weight || undefined,
         packSize: productForm.packSize || undefined,
         description: productForm.description || undefined,
+        highlights: highlights.length > 0 ? highlights : undefined,
         images: productImages,
         image: productImages[0]?.url,
-        attributes: Object.keys(attributes).length ? attributes : undefined,
       };
 
       if (editingId) {
@@ -263,9 +324,7 @@ const Admin = () => {
       weight: product.weight || "",
       packSize: product.packSize || "",
       description: product.description || "",
-      highlights: product.attributes
-        ? Object.entries(product.attributes).map(([k, v]) => `${k}: ${v}`).join("\n")
-        : "",
+      highlights: Array.isArray(product.highlights) ? product.highlights.join("\n") : "",
     });
     setProductImages(Array.isArray(product.images) ? product.images : []);
   };
@@ -386,6 +445,152 @@ const Admin = () => {
       await sliderAPI.delete(id);
       await queryClient.invalidateQueries({ queryKey: ["admin-slider"] });
       toast("Slider image removed");
+    } catch (error: any) {
+      toast("Delete failed", { description: error?.response?.data?.message || "Please try again." });
+    }
+  };
+
+  const handleUploadVideo = async () => {
+    if (videoForm.videoType === 'upload' && (!videoFile || videoFile.length === 0)) {
+      toast("Select a video file");
+      return;
+    }
+    if (videoForm.videoType === 'youtube' && !videoForm.videoUrl.trim()) {
+      toast("Enter YouTube URL");
+      return;
+    }
+    if (!videoForm.title.trim()) {
+      toast("Enter video title");
+      return;
+    }
+
+    setVideoUploading(true);
+    try {
+      let videoUrl = videoForm.videoUrl;
+      
+      if (videoForm.videoType === 'upload' && videoFile) {
+        const form = new FormData();
+        form.append("file", videoFile[0]);
+        const res = await uploadAPI.uploadVideo(form);
+        if (res.data?.success && res.data?.data?.url) {
+          videoUrl = res.data.data.url;
+        }
+      }
+
+      const payload = {
+        title: videoForm.title,
+        description: videoForm.description,
+        videoType: videoForm.videoType,
+        videoUrl,
+        thumbnailUrl: videoForm.thumbnailUrl,
+        sortOrder: Number(videoForm.sortOrder) || 0,
+        active: videoForm.active,
+      };
+
+      if (videoEditingId) {
+        await videosAPI.update(videoEditingId, payload);
+        toast("Video updated");
+      } else {
+        await videosAPI.create(payload);
+        toast("Video added");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
+      setVideoForm({ title: "", description: "", videoType: "youtube", videoUrl: "", thumbnailUrl: "", sortOrder: "0", active: true });
+      setVideoFile(null);
+      setVideoEditingId(null);
+    } catch (error: any) {
+      toast("Operation failed", { description: error?.response?.data?.message || "Please try again." });
+    } finally {
+      setVideoUploading(false);
+    }
+  };
+
+  const handleEditVideo = (video: any) => {
+    setVideoForm({
+      title: video.title,
+      description: video.description || "",
+      videoType: video.videoType,
+      videoUrl: video.videoUrl,
+      thumbnailUrl: video.thumbnailUrl || "",
+      sortOrder: String(video.sortOrder || 0),
+      active: video.active !== false,
+    });
+    setVideoEditingId(video._id);
+  };
+
+  const handleDeleteVideo = async (id: string) => {
+    if (!confirm("Delete this video?")) return;
+    try {
+      await videosAPI.delete(id);
+      await queryClient.invalidateQueries({ queryKey: ["admin-videos"] });
+      toast("Video deleted");
+    } catch (error: any) {
+      toast("Delete failed", { description: error?.response?.data?.message || "Please try again." });
+    }
+  };
+
+  const handleUploadBanner = async () => {
+    if (!bannerFile || bannerFile.length === 0) {
+      toast("Select a banner image");
+      return;
+    }
+
+    setBannerUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", bannerFile[0]);
+      const res = await uploadAPI.uploadBanner(form);
+      
+      if (res.data?.success && res.data?.data?.url) {
+        const payload = {
+          title: bannerForm.title,
+          imageUrl: res.data.data.url,
+          public_id: res.data.data.public_id,
+          link: bannerForm.link,
+          position: bannerForm.position,
+          sortOrder: Number(bannerForm.sortOrder) || 0,
+          active: bannerForm.active,
+        };
+
+        if (bannerEditingId) {
+          await bannersAPI.update(bannerEditingId, payload);
+          toast("Banner updated");
+        } else {
+          await bannersAPI.create(payload);
+          toast("Banner added");
+        }
+
+        await queryClient.invalidateQueries({ queryKey: ["admin-banners"] });
+        setBannerForm({ title: "", imageUrl: "", link: "", position: "main", sortOrder: "0", active: true });
+        setBannerFile(null);
+        setBannerEditingId(null);
+      }
+    } catch (error: any) {
+      toast("Upload failed", { description: error?.response?.data?.message || "Please try again." });
+    } finally {
+      setBannerUploading(false);
+    }
+  };
+
+  const handleEditBanner = (banner: any) => {
+    setBannerForm({
+      title: banner.title || "",
+      imageUrl: banner.imageUrl,
+      link: banner.link || "",
+      position: banner.position || "main",
+      sortOrder: String(banner.sortOrder || 0),
+      active: banner.active !== false,
+    });
+    setBannerEditingId(banner._id);
+  };
+
+  const handleDeleteBanner = async (id: string) => {
+    if (!confirm("Delete this banner?")) return;
+    try {
+      await bannersAPI.delete(id);
+      await queryClient.invalidateQueries({ queryKey: ["admin-banners"] });
+      toast("Banner deleted");
     } catch (error: any) {
       toast("Delete failed", { description: error?.response?.data?.message || "Please try again." });
     }
@@ -770,6 +975,170 @@ const Admin = () => {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {active === "banners" && (
+              <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{bannerEditingId ? "Edit Banner" : "Add Banner"}</CardTitle>
+                    <CardDescription>Manage banners for different sections of the website.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Title</Label>
+                        <Input value={bannerForm.title} onChange={(e) => setBannerForm((p) => ({ ...p, title: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Link (optional)</Label>
+                        <Input value={bannerForm.link} onChange={(e) => setBannerForm((p) => ({ ...p, link: e.target.value }))} placeholder="https://..." />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Position</Label>
+                        <Select value={bannerForm.position} onValueChange={(value: any) => setBannerForm((p) => ({ ...p, position: value }))}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="header">Header</SelectItem>
+                            <SelectItem value="main">Main</SelectItem>
+                            <SelectItem value="sidebar">Sidebar</SelectItem>
+                            <SelectItem value="footer">Footer</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Sort Order</Label>
+                        <Input type="number" value={bannerForm.sortOrder} onChange={(e) => setBannerForm((p) => ({ ...p, sortOrder: e.target.value }))} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Banner Image</Label>
+                      <Input type="file" accept="image/*" onChange={(e) => setBannerFile(e.target.files)} />
+                    </div>
+
+                    <Button onClick={handleUploadBanner} disabled={bannerUploading}>
+                      {bannerUploading ? "Uploading..." : bannerEditingId ? "Update Banner" : "Add Banner"}
+                    </Button>
+                    {bannerEditingId && (
+                      <Button variant="outline" onClick={() => { setBannerEditingId(null); setBannerForm({ title: "", imageUrl: "", link: "", position: "main", sortOrder: "0", active: true }); }}>
+                        Cancel Edit
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Banner List</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {banners.map((banner: any) => (
+                      <div key={banner._id} className="rounded-lg overflow-hidden border">
+                        <img src={banner.imageUrl} alt={banner.title} className="h-24 w-full object-cover" />
+                        <div className="p-3 space-y-2">
+                          <p className="font-medium text-sm">{banner.title || "Untitled"}</p>
+                          <p className="text-xs text-muted-foreground">Position: {banner.position}</p>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" onClick={() => handleEditBanner(banner)}>Edit</Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteBanner(banner._id)}>Delete</Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {active === "videos" && (
+              <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{videoEditingId ? "Edit Video" : "Add Video Review"}</CardTitle>
+                    <CardDescription>Manage short-form video reviews (YouTube or uploaded videos).</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Video Type</Label>
+                      <Select value={videoForm.videoType} onValueChange={(value: any) => setVideoForm((p) => ({ ...p, videoType: value }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="youtube">YouTube Link</SelectItem>
+                          <SelectItem value="upload">Upload Video</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Title</Label>
+                        <Input value={videoForm.title} onChange={(e) => setVideoForm((p) => ({ ...p, title: e.target.value }))} placeholder="Video title" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Sort Order</Label>
+                        <Input type="number" value={videoForm.sortOrder} onChange={(e) => setVideoForm((p) => ({ ...p, sortOrder: e.target.value }))} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea value={videoForm.description} onChange={(e) => setVideoForm((p) => ({ ...p, description: e.target.value }))} placeholder="Video description" rows={3} />
+                    </div>
+
+                    {videoForm.videoType === 'youtube' ? (
+                      <div className="space-y-2">
+                        <Label>YouTube URL</Label>
+                        <Input value={videoForm.videoUrl} onChange={(e) => setVideoForm((p) => ({ ...p, videoUrl: e.target.value }))} placeholder="https://youtube.com/watch?v=... or https://youtu.be/..." />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label>Upload Video</Label>
+                        <Input type="file" accept="video/*" onChange={(e) => setVideoFile(e.target.files)} />
+                      </div>
+                    )}
+
+                    <Button onClick={handleUploadVideo} disabled={videoUploading}>
+                      {videoUploading ? "Processing..." : videoEditingId ? "Update Video" : "Add Video"}
+                    </Button>
+                    {videoEditingId && (
+                      <Button variant="outline" onClick={() => { setVideoEditingId(null); setVideoForm({ title: "", description: "", videoType: "youtube", videoUrl: "", thumbnailUrl: "", sortOrder: "0", active: true }); }}>
+                        Cancel Edit
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Video List</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {videos.map((video: any) => (
+                      <div key={video._id} className="rounded-lg border p-3 space-y-2">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-medium text-sm">{video.title}</p>
+                            <p className="text-xs text-muted-foreground">{video.videoType === 'youtube' ? 'YouTube' : 'Uploaded'}</p>
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded ${video.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                            {video.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                        {video.description && <p className="text-xs text-muted-foreground">{video.description.slice(0, 60)}...</p>}
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" onClick={() => handleEditVideo(video)}>Edit</Button>
+                          <Button size="sm" variant="ghost" onClick={() => handleDeleteVideo(video._id)}>Delete</Button>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </main>
         </div>

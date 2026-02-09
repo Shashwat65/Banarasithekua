@@ -12,6 +12,9 @@ const adminUserRouter = require("./routes/admin/user-routes");
 const adminComboRouter = require("./routes/admin/combo-routes");
 const adminTeamRouter = require("./routes/admin/team-routes");
 const adminSliderRouter = require("./routes/admin/slider-routes");
+const adminVideoRouter = require("./routes/admin/video-routes");
+const adminBannerRouter = require("./routes/admin/banner-routes");
+const adminUploadRouter = require("./routes/admin/upload-routes");
 
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
@@ -25,6 +28,8 @@ const shopCombosRouter = require('./routes/shop/combos-routes');
 const commonFeatureRouter = require("./routes/common/feature-routes");
 const commonTeamRouter = require("./routes/common/team-routes");
 const commonSliderRouter = require("./routes/common/slider-routes");
+const commonVideoRouter = require("./routes/common/video-routes");
+const commonBannerRouter = require("./routes/common/banner-routes");
 
 //create a database connection -> u can also
 //create a separate file for this and then import/use that file here
@@ -133,6 +138,9 @@ app.use("/api/admin/orders", adminOrderRouter);
 app.use("/api/admin/categories", adminCategoryRouter);
 app.use("/api/admin/users", adminUserRouter);
 app.use("/api/admin/combos", adminComboRouter);
+app.use("/api/admin/videos", adminVideoRouter);
+app.use("/api/admin/banners", adminBannerRouter);
+app.use("/api/admin/upload", adminUploadRouter);
 app.use("/api/admin/team", adminTeamRouter);
 app.use("/api/admin/sliders", adminSliderRouter);
 
@@ -145,6 +153,8 @@ app.use("/api/shop/review", shopReviewRouter);
 app.use('/api/shop/payment/phonepe', phonepeStdRouter);
 app.use('/api/shop/combos', shopCombosRouter);
 
+app.use("/api/common/videos", commonVideoRouter);
+app.use("/api/common/banners", commonBannerRouter);
 app.use("/api/common/feature", commonFeatureRouter);
 app.use("/api/common/team", commonTeamRouter);
 app.use("/api/common/slider", commonSliderRouter);

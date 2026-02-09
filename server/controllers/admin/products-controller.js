@@ -41,6 +41,7 @@ const addProduct = async (req, res) => {
 
     const images = normalizeImages(body);
     const image = body.image || images[0]?.url;
+    const highlights = Array.isArray(body.highlights) ? body.highlights : [];
 
     const product = await Product.create({
       name,
@@ -56,6 +57,7 @@ const addProduct = async (req, res) => {
       brand: body.brand,
       weight: body.weight,
       packSize: body.packSize,
+      highlights,
       image,
       images,
       attributes: body.attributes && typeof body.attributes === "object" ? body.attributes : undefined,
@@ -114,6 +116,7 @@ const editProduct = async (req, res) => {
     assign("packSize", body.packSize);
     assign("image", body.image);
     if (Array.isArray(body.images)) product.images = body.images.slice(0, 8);
+    if (Array.isArray(body.highlights)) product.highlights = body.highlights;
     if (body.attributes && typeof body.attributes === "object") product.attributes = body.attributes;
 
     await product.save();

@@ -115,6 +115,21 @@ export const uploadAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  uploadProduct: (formData: FormData) => api.post('/admin/upload/product', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  uploadSlider: (formData: FormData) => api.post('/admin/upload/slider', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  uploadTeam: (formData: FormData) => api.post('/admin/upload/team', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  uploadVideo: (formData: FormData) => api.post('/admin/upload/video', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  uploadBanner: (formData: FormData) => api.post('/admin/upload/banner', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
   deleteImage: (_publicId: string) => Promise.reject(new Error('Delete image endpoint not implemented')),
 };
 
@@ -154,6 +169,25 @@ export const sliderAPI = {
   create: (data: any) => api.post('/admin/sliders/add', data),
   update: (id: string, data: any) => api.put(`/admin/sliders/edit/${id}`, data),
   delete: (id: string) => api.delete(`/admin/sliders/delete/${id}`),
+};
+
+// Video Reviews API
+export const videosAPI = {
+  getAllPublic: () => api.get('/common/videos'),
+  getAllAdmin: () => api.get('/admin/videos'),
+  create: (data: any) => api.post('/admin/videos', data),
+  update: (id: string, data: any) => api.put(`/admin/videos/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/videos/${id}`),
+  incrementViews: (id: string) => api.post(`/common/videos/${id}/view`),
+};
+
+// Banners API
+export const bannersAPI = {
+  getAllPublic: (position?: string) => api.get('/common/banners', { params: { position } }),
+  getAllAdmin: () => api.get('/admin/banners'),
+  create: (data: any) => api.post('/admin/banners', data),
+  update: (id: string, data: any) => api.put(`/admin/banners/${id}`, data),
+  delete: (id: string) => api.delete(`/admin/banners/${id}`),
 };
 
 

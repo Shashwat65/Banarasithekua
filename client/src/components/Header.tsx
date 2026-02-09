@@ -1,4 +1,4 @@
-import { Menu, Search, ShoppingCart, LogIn, UserPlus } from "lucide-react";
+import { Menu, Search, ShoppingCart, LogIn, UserPlus, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ganeshaMark from "@/assets/ganesha-mark.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -87,6 +87,14 @@ const Header = () => {
         onClick={handleCall}
       >
         Call Us
+      </Button>
+      <Button
+        variant="outline"
+        className="border-primary/30 text-secondary hover:bg-primary/5 px-4"
+        onClick={() => navigate("/my-orders")}
+      >
+        <Package className="h-4 w-4 mr-2" />
+        My Orders
       </Button>
       <Button
         className="relative bg-primary hover:bg-primary/90 text-primary-foreground px-6 shadow-lg shadow-primary/30"
@@ -201,6 +209,8 @@ const Header = () => {
           {user.role === "admin" ? (
             <DropdownMenuItem onClick={() => navigate("/admin")}>Admin Dashboard</DropdownMenuItem>
           ) : null}
+          <DropdownMenuItem onClick={() => navigate("/my-orders")}>My Orders</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate("/my-orders")}>My Orders</DropdownMenuItem>
           <DropdownMenuItem onClick={handleCartNavigate}>My Cart</DropdownMenuItem>
           <DropdownMenuItem onClick={handleCheckoutNavigate}>Checkout</DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -266,6 +276,10 @@ const Header = () => {
                 <div className="mt-8 grid gap-3 text-sm">
                   {user ? (
                     <>
+                      <Button onClick={() => navigate("/my-orders")} className="justify-start">
+                        <Package className="h-4 w-4 mr-2" />
+                        My Orders
+                      </Button>
                       <Button onClick={handleCartNavigate} className="justify-start">
                         View Cart
                       </Button>

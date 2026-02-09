@@ -2,6 +2,8 @@ import HeroCarousel from "@/components/HeroCarousel";
 import ProductGrid from "@/components/ProductGrid";
 import CoreValues from "@/components/CoreValues";
 import Story from "@/components/Story";
+import VideoReviews from "@/components/VideoReviews";
+import BannerDisplay from "@/components/BannerDisplay";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -35,8 +37,13 @@ const Index = () => {
       <section id="hero">
         <HeroCarousel />
       </section>
+      <BannerDisplay position="header" className="container mx-auto px-6 py-4" />
       <section id="products">
         <ProductGrid />
+      </section>
+      <BannerDisplay position="main" className="container mx-auto px-6 py-8" />
+      <section id="videos">
+        <VideoReviews />
       </section>
       <section id="values">
         <CoreValues />
@@ -44,6 +51,7 @@ const Index = () => {
       <section id="story">
         <Story />
       </section>
+      <BannerDisplay position="footer" className="container mx-auto px-6 py-8" />
     </div>
   );
 };

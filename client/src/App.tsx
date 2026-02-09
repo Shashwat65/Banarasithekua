@@ -16,6 +16,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import TrackOrder from "./pages/TrackOrder";
+import MyOrders from "./pages/MyOrders";
 import Products from "./pages/Products";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -102,6 +103,10 @@ const App = () => (
                 }
               />
               <Route path="/track-order/:orderId" element={<Layout><TrackOrder /></Layout>} />
+              <Route
+                path="/my-orders"
+                element={<RequireAuth><Layout><MyOrders /></Layout></RequireAuth>}
+              />
               <Route path="/terms" element={<Layout><Terms /></Layout>} />
               <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
               <Route path="/returns-and-shipping" element={<Layout><ReturnsAndShipping /></Layout>} />
