@@ -187,8 +187,6 @@ const Admin = () => {
 
   const { data: bannersData } = useQuery({
     queryKey: ["admin-banners"],
-  const videos = Array.isArray(videosData) ? videosData : [];
-  const banners = Array.isArray(bannersData) ? bannersData : [];
     enabled: active === "banners",
     queryFn: async () => {
       const res = await bannersAPI.getAllAdmin();
@@ -207,6 +205,8 @@ const Admin = () => {
   const orders = Array.isArray(ordersData) ? ordersData : [];
   const team = Array.isArray(teamData) ? teamData : [];
   const sliders = Array.isArray(sliderData) ? sliderData : [];
+  const videos = Array.isArray(videosData) ? videosData : [];
+  const banners = Array.isArray(bannersData) ? bannersData : [];
 
   const totalSales = useMemo(() => {
     return orders
