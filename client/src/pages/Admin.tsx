@@ -391,6 +391,16 @@ const Admin = () => {
     }
   };
 
+  const handleUpdateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      await ordersAPI.updateStatus(orderId, { orderStatus: status });
+      toast("Order status updated");
+      await queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+    } catch (error: any) {
+      toast("Update failed", { description: error?.response?.data?.message || "Please try again." });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/10 py-10">
       <div className="container mx-auto px-6">
@@ -628,9 +638,29 @@ const Admin = () => {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-secondary">Order #{order._id}</p>
-                          <p className="text-xs text-muted-foreground">Status: {order.orderStatus} • Payment: {order.paymentStatus}</p>
+                          <p className="text-xs text-muted-foreground">Payment: {order.paymentStatus}</p>
                         </div>
                         <p className="font-semibold">₹{Number(order.totalAmount || 0).toFixed(0)}</p>
+                      </div>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="text-sm text-muted-foreground">Current status: <span className="text-secondary font-medium">{order.orderStatus || "pending"}</span></div>
+                        <Select
+                          value={order.orderStatus || "pending"}
+                          onValueChange={(value) => handleUpdateOrderStatus(order._id, value)}
+                        >
+                          <SelectTrigger className="w-full sm:w-[220px]">
+                            <SelectValue placeholder="Update status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                            <SelectItem value="processing">Processing</SelectItem>
+                            <SelectItem value="shipped">Shipped</SelectItem>
+                            <SelectItem value="out-for-delivery">Out for delivery</SelectItem>
+                            <SelectItem value="delivered">Delivered</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="grid gap-2 text-sm text-muted-foreground">
                         <p><span className="text-secondary">Name:</span> {order.userName || "Guest"}</p>
