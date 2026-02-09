@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ganeshaMark from "@/assets/ganesha-mark.svg";
@@ -9,47 +9,15 @@ import premiumMixedThekua from "@/assets/premium-mixed-thekua.jpg";
 import { sliderAPI } from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
 
-const defaultSlides = [
-  {
-    id: 1,
-    badge: "Ganesh Chaturthi Special",
-    title: "Banarasi Thekua For Auspicious Beginnings",
-    highlight: "25% OFF",
-    copy: "Celebrate Bappa with slow-roasted Banarasi thekua hampers, handcrafted in ghee and delivered pan-India within 24 hours.",
-    code: "GANPATI25",
-    cta: "Shop Festive Hampers",
-    accent: "Freshly packed each morning",
-    images: [traditionalThekua, jaggeryThekua, premiumMixedThekua],
-  },
-  {
-    id: 2,
-    badge: "Community Favourite",
-    title: "Jaggery Classics From Banaras Lanes",
-    highlight: "Buy 2 Get 1",
-    copy: "Blend your own box with jaggery, coconut, and khoya edits perfected from Maruti Nagar kitchens.",
-    code: "SWEETTRADITION",
-    cta: "Build Your Box",
-    accent: "Ships fresh daily",
-    images: [jaggeryThekua, coconutThekua, traditionalThekua],
-  },
-  {
-    id: 3,
-    badge: "Limited Release",
-    title: "Banarasi Celebration Trunk",
-    highlight: "Free Shipping",
-    copy: "A keepsake trunk with signature thekua jars, spice sachets, and artisanal decor from Varanasi artisans.",
-    code: "CELEBRATE",
-    cta: "Pre-Order Now",
-    accent: "Dispatch starts 5 Oct",
-    images: [premiumMixedThekua, coconutThekua, jaggeryThekua],
-  },
-];
+// Default images if database is empty
+const defaultImages = [traditionalThekua, jaggeryThekua, coconutThekua, premiumMixedThekua];
 
-const HERO_INTERVAL = 7000;
+const HERO_INTERVAL = 5000;
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // Fetch slider images from database
   const { data: sliderData } = useQuery({
     queryKey: ["sliders", "homepage"],
     queryFn: async () => {
@@ -62,41 +30,23 @@ const HeroCarousel = () => {
     },
   });
 
-  const sliderImages = Array.isArray(sliderData) ? sliderData.filter((x: any) => x && (x.url || x.image)) : [];
-
-  // Chunk images into groups of 3 to match the layout
-  const chunkedSlides = useMemo(() => {
-    if (!sliderImages.length) return defaultSlides;
-    const chunks: string[][] = [];
-    for (let i = 0; i < sliderImages.length; i += 3) {
-      chunks.push(sliderImages.slice(i, i + 3).map((img: any) => img.url || img.image));
-    }
-    // Build slides from chunks with generic copy
-    return chunks.map((images, idx) => ({
-      id: idx + 1,
-      badge: "Featured",
-      title: "Banarasi Thekua – Handcrafted Fresh Daily",
-      highlight: "Fresh Batch",
-      copy: "Discover our hand-crafted thekua collection. Pure ingredients, small-batch, delivered fast.",
-      code: "SHUDDH",
-      cta: "Shop Now",
-      accent: "Made with pure ghee",
-      images,
-    }));
-  }, [sliderImages]);
+  // Use database images or fallback to defaults
+  const slides = sliderData && sliderData.length > 0 
+    ? sliderData.filter((x: any) => x && x.url).map((img: any) => img.url)
+    : defaultImages;
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % chunkedSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, HERO_INTERVAL);
 
     return () => clearInterval(timer);
-  }, [chunkedSlides.length]);
+  }, [slides.length]);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % chunkedSlides.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + chunkedSlides.length) % chunkedSlides.length);
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
-  const slide = chunkedSlides[currentSlide];
+  const currentImage = slides[currentSlide];
 
   return (
     <section
@@ -120,99 +70,106 @@ const HeroCarousel = () => {
           <div className="space-y-8">
             <div className="inline-flex items-center gap-3 bg-secondary/10 text-secondary px-4 py-2 rounded-full shadow-sm">
               <img src={ganeshaMark} alt="Banarasi Thekua ganesha badge" className="w-7 h-7 sm:w-8 sm:h-8" />
-              <span className="text-[10px] sm:text-xs font-semibold tracking-[0.4em] uppercase">{slide.badge}</span>
+              <span className="text-[10px] sm:text-xs font-semibold tracking-[0.4em] uppercase">FEATURED</span>
             </div>
 
             <div className="max-w-2xl space-y-6">
               <div className="flex flex-wrap items-baseline gap-4">
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] leading-tight font-semibold text-secondary text-pretty">
-                  {slide.title}
+                  Banarasi Thekua – Handcrafted Fresh Daily
                 </h1>
                 <span className="inline-flex items-center bg-accent text-accent-foreground font-bold text-sm sm:text-base px-4 py-1 rounded-full shadow">
-                  {slide.highlight}
+                  Fresh Batch
                 </span>
               </div>
               <p className="text-base sm:text-lg text-secondary/80 max-w-xl text-pretty">
-                {slide.copy}
+                Discover our hand-crafted thekua collection. Pure ingredients, small-batch, delivered fast.
               </p>
-              {/* Static (non-clickable) CTA presentation: removed button interactivity per request */}
               <div className="flex flex-wrap items-center gap-4 select-none">
                 <div
                   className="px-6 py-4 text-sm sm:text-base font-semibold rounded-full shadow-xl shadow-primary/20 bg-primary text-primary-foreground pointer-events-none cursor-default"
                   aria-hidden="true"
                 >
-                  {slide.cta}
+                  Shop Now
                 </div>
                 <div
                   className="px-4 py-2 rounded-full border border-primary/30 bg-white/60 text-[10px] sm:text-xs uppercase tracking-[0.3em] text-secondary font-medium pointer-events-none cursor-default"
                   aria-hidden="true"
                 >
-                  Use Code {slide.code}
+                  Use Code SHUDDH
                 </div>
               </div>
               <div className="flex items-center gap-3 text-sm text-secondary/70">
                 <span className="inline-flex h-2 w-2 rounded-full bg-secondary/60" />
-                {slide.accent}
+                Made with pure ghee
               </div>
             </div>
           </div>
 
-          {/* Imagery */}
+          {/* Full-width Slider Image */}
           <div className="relative">
             <div className="absolute inset-0 rounded-[32px] sm:rounded-[40px] bg-white/70 backdrop-blur-sm border border-white/50 shadow-[0_28px_48px_rgba(84,48,33,0.16)]" />
-            <div className="relative grid grid-cols-3 gap-3 sm:gap-4 p-5 sm:p-8">
-              {slide.images.map((image: string, index: number) => (
-                <div
-                  key={`${slide.id}-${index}`}
-                  className="bg-white rounded-[20px] sm:rounded-[28px] shadow-card overflow-hidden border border-border/60"
-                >
-                  <img
-                    src={image}
-                    alt="Festive thekua packaging"
-                    className="h-40 sm:h-48 md:h-52 w-full object-cover"
-                    draggable={false}
-                  />
-                  <div className="px-3 sm:px-4 py-3 text-center">
-                    <p className="text-[9px] sm:text-[10px] font-semibold tracking-[0.4em] text-secondary/70 uppercase">
-                      Banarasi Thekua
-                    </p>
+            <div className="relative overflow-hidden rounded-[32px] sm:rounded-[40px]">
+              {/* Slider Images */}
+              <div className="relative aspect-[4/3] sm:aspect-[16/10]">
+                {slides.map((image: string, index: number) => (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-opacity duration-700 ${
+                      index === currentSlide ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Banarasi Thekua ${index + 1}`}
+                      className="w-full h-full object-cover rounded-[28px] sm:rounded-[36px]"
+                      draggable={false}
+                    />
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              {/* Overlay text */}
+              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent p-6 rounded-b-[28px] sm:rounded-b-[36px]">
+                <p className="text-white text-sm sm:text-base font-semibold tracking-[0.3em] uppercase text-center">
+                  Banarasi Thekua
+                </p>
+              </div>
             </div>
-            <div className="absolute -top-8 -right-10 w-40 sm:w-52 opacity-60 rotate-12">
+            <div className="absolute -top-8 -right-10 w-40 sm:w-52 opacity-60 rotate-12 pointer-events-none">
               <img src={ganeshaMark} alt="ganesha watermark" className="w-full h-full" />
             </div>
+      {slides.length > 1 && (
+        <div className="absolute inset-x-0 bottom-6 sm:bottom-8 flex items-center justify-between px-6 sm:px-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={prevSlide}
+            className="hidden md:flex h-11 w-11 rounded-full bg-white/80 hover:bg-white shadow-lg text-secondary"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <div className="mx-auto flex gap-2">
+            {slides.map((_: any, index: number) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlide ? "w-10 bg-secondary" : "w-3 bg-secondary/40"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={nextSlide}
+            className="hidden md:flex h-11 w-11 rounded-full bg-white/80 hover:bg-white shadow-lg text-secondary"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
         </div>
-      </div>
-
-      {/* Carousel controls */}
-      <div className="absolute inset-x-0 bottom-6 sm:bottom-8 flex items-center justify-between px-6 sm:px-10">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={prevSlide}
-          className="hidden md:flex h-11 w-11 rounded-full bg-white/80 hover:bg-white shadow-lg text-secondary"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-        <div className="mx-auto flex gap-2">
-          {chunkedSlides.map((_, index) => (
-            <button
-              key={_.id}
-              onClick={() => setCurrentSlide(index)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                index === currentSlide ? "w-10 bg-secondary" : "w-3 bg-secondary/40"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={nextSlide}
+      )}Click={nextSlide}
           className="hidden md:flex h-11 w-11 rounded-full bg-white/80 hover:bg-white shadow-lg text-secondary"
         >
           <ChevronRight className="h-5 w-5" />
