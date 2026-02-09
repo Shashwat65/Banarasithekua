@@ -24,6 +24,9 @@ const createOrder = async (req, res) => {
     // Create order first
     const newlyCreatedOrder = new Order({
       userId,
+      userName,
+      userEmail,
+      userPhone,
       cartId,
       cartItems,
       addressInfo,

@@ -1,35 +1,67 @@
-import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { productsAPI, uploadAPI, categoriesAPI, ordersAPI, sliderAPI } from "@/services/api";
+import { categoriesAPI, ordersAPI, productsAPI, sliderAPI, teamAPI, uploadAPI } from "@/services/api";
 import { toast } from "sonner";
-import { Trash2, Upload, Plus, X } from "lucide-react";
 
 const sections = [
   { key: "dashboard", label: "Dashboard", description: "Quick overview of store metrics and activity." },
   { key: "products", label: "Products", description: "Create, update, and manage your product catalog." },
   { key: "orders", label: "Orders", description: "Review and update order status across customers." },
   { key: "categories", label: "Categories", description: "Maintain category structure for product filtering." },
-  { key: "sliders", label: "Slider", description: "Manage homepage slider images and ordering." },
   { key: "team", label: "Team", description: "Manage team members shown on the website." },
-  { key: "users", label: "Users", description: "Manage customer accounts and admin access." },
+  { key: "slider", label: "Slider", description: "Manage homepage slider images." },
 ];
+
+type ImageItem = { url: string; public_id?: string; _id?: string };
+
+type ProductForm = {
+  name: string;
+  slug: string;
+  price: string;
+  originalPrice: string;
+  stock: string;
+  category: string;
+  weight: string;
+  packSize: string;
+  description: string;
+  highlights: string;
+};
+
+type TeamForm = {
+  name: string;
+  role: string;
+  photo: string;
+  order: string;
+  active: boolean;
+};
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 
 const Admin = () => {
   const { section } = useParams();
-  const active = section || "dashboard";
-  const current = sections.find((s) => s.key === active) || sections[0];
+  const location = useLocation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Product form state
-  const [form, setForm] = useState({
+  const active = section || "dashboard";
+  const current = sections.find((s) => s.key === active) || sections[0];
+
+  const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
+    slug: "",
     price: "",
     originalPrice: "",
     stock: "",
@@ -37,150 +69,205 @@ const Admin = () => {
     weight: "",
     packSize: "",
     description: "",
+    highlights: "",
   });
-  const [images, setImages] = useState<Array<{ url: string; public_id?: string }>>([]);
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [productImages, setProductImages] = useState<ImageItem[]>([]);
+  const [productFiles, setProductFiles] = useState<FileList | null>(null);
+  const [productSaving, setProductSaving] = useState(false);
+  const [productUploading, setProductUploading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Category form state
-  const [categoryName, setCategoryName] = useState("");
-  const [addingCategory, setAddingCategory] = useState(false);
+  const [categoryForm, setCategoryForm] = useState({ name: "", slug: "" });
+  const [teamForm, setTeamForm] = useState<TeamForm>({ name: "", role: "", photo: "", order: "0", active: true });
+  const [teamFile, setTeamFile] = useState<FileList | null>(null);
+  const [teamUploading, setTeamUploading] = useState(false);
 
-  // Slider form state
-  const [sliderImage, setSliderImage] = useState("");
-  const [sliderTitle, setSliderTitle] = useState("");
-  const [sliderDescription, setSliderDescription] = useState("");
-  const [sliderOrder, setSliderOrder] = useState("");
-  const [sliderFile, setSliderFile] = useState<File | null>(null);
-  const [uploadingSlider, setUploadingSlider] = useState(false);
+  const [sliderFile, setSliderFile] = useState<FileList | null>(null);
+  const [sliderUploading, setSliderUploading] = useState(false);
 
-  // Fetch products
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ["admin-products"],
-    enabled: active === "products",
+    enabled: active === "products" || active === "dashboard",
     queryFn: async () => {
       const res = await productsAPI.getAll();
       return res.data?.data || [];
     },
   });
 
-  // Fetch categories
-  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
+  const { data: categoriesData } = useQuery({
     queryKey: ["admin-categories"],
     enabled: active === "products" || active === "categories",
     queryFn: async () => {
-      try {
-        const res = await categoriesAPI.getAll();
-        return res.data?.data || [];
-      } catch {
-        return [];
-      }
+      const res = await categoriesAPI.getAll();
+      return res.data?.data || [];
     },
   });
 
-  // Fetch orders
-  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+  const { data: ordersData } = useQuery({
     queryKey: ["admin-orders"],
-    enabled: active === "orders",
+    enabled: active === "orders" || active === "dashboard",
     queryFn: async () => {
-      try {
-        const res = await ordersAPI.getAll();
-        return res.data?.data || [];
-      } catch {
-        return [];
-      }
+      const res = await ordersAPI.getAll();
+      return res.data?.data || [];
     },
   });
 
-  // Fetch sliders
-  const { data: slidersData, isLoading: slidersLoading } = useQuery({
-    queryKey: ["admin-sliders"],
-    enabled: active === "sliders",
+  const { data: teamData } = useQuery({
+    queryKey: ["admin-team"],
+    enabled: active === "team",
     queryFn: async () => {
-      try {
-        const res = await sliderAPI.getAllAdmin();
-        return res.data?.data || [];
-      } catch {
-        return [];
-      }
+      const res = await teamAPI.getAllAdmin();
+      return res.data?.data || [];
     },
   });
 
-  const categories = useMemo(() => Array.isArray(categoriesData) ? categoriesData : [], [categoriesData]);
-  const orders = useMemo(() => Array.isArray(ordersData) ? ordersData : [], [ordersData]);
-  const sliders = useMemo(() => Array.isArray(slidersData) ? slidersData : [], [slidersData]);
+  const { data: sliderData } = useQuery({
+    queryKey: ["admin-slider"],
+    enabled: active === "slider",
+    queryFn: async () => {
+      const res = await sliderAPI.getAllAdmin();
+      return res.data?.data || [];
+    },
+  });
 
-  const handleChange = (key: keyof typeof form, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  useEffect(() => {
+    if (productForm.name && !editingId) {
+      setProductForm((prev) => ({ ...prev, slug: slugify(prev.name) }));
+    }
+  }, [productForm.name, editingId]);
+
+  const categories = Array.isArray(categoriesData) ? categoriesData : [];
+  const products = Array.isArray(productsData) ? productsData : [];
+  const orders = Array.isArray(ordersData) ? ordersData : [];
+  const team = Array.isArray(teamData) ? teamData : [];
+  const sliders = Array.isArray(sliderData) ? sliderData : [];
+
+  const totalSales = useMemo(() => {
+    return orders
+      .filter((o: any) => o.paymentStatus === "paid")
+      .reduce((sum: number, o: any) => sum + Number(o.totalAmount || o.totalPrice || 0), 0);
+  }, [orders]);
+
+  const monthlySales = useMemo(() => {
+    const months = new Array(6).fill(0);
+    orders.forEach((order: any) => {
+      const date = new Date(order.orderDate || order.createdAt || Date.now());
+      const monthIndex = new Date().getMonth() - date.getMonth();
+      if (monthIndex >= 0 && monthIndex < months.length) {
+        months[monthIndex] += Number(order.totalAmount || 0);
+      }
+    });
+    return months.reverse();
+  }, [orders]);
+
+  const goTo = (key: string) => {
+    const path = key === "dashboard" ? "/admin" : `/admin/${key}`;
+    if (location.pathname !== path) navigate(path);
   };
 
-  const handleUpload = async () => {
-    if (!selectedFiles || selectedFiles.length === 0) {
-      toast("Select an image first");
+  const uploadFiles = async (files: FileList) => {
+    const uploads: ImageItem[] = [];
+    for (const file of Array.from(files)) {
+      const form = new FormData();
+      form.append("my_file", file);
+      const res = await uploadAPI.uploadImage(form);
+      if (res.data?.success && res.data?.data?.url) {
+        uploads.push({ url: res.data.data.url, public_id: res.data.data.public_id });
+      }
+    }
+    return uploads;
+  };
+
+  const handleUploadProductImages = async () => {
+    if (!productFiles || productFiles.length === 0) {
+      toast("Select images to upload");
       return;
     }
-    setUploading(true);
+    setProductUploading(true);
     try {
-      const uploads: Array<{ url: string; public_id?: string }> = [];
-      for (const file of Array.from(selectedFiles)) {
-        const data = new FormData();
-        data.append("my_file", file);
-        const res = await uploadAPI.uploadImage(data);
-        if (res.data?.success && res.data?.data?.url) {
-          uploads.push({ url: res.data.data.url, public_id: res.data.data.public_id });
-        }
-      }
-      if (uploads.length > 0) {
-        setImages((prev) => [...prev, ...uploads]);
-        toast("Image uploaded", { description: `${uploads.length} image(s) added.` });
-      }
+      const uploaded = await uploadFiles(productFiles);
+      setProductImages((prev) => [...prev, ...uploaded]);
+      setProductFiles(null);
+      toast("Images uploaded", { description: `${uploaded.length} image(s) added.` });
     } catch (error: any) {
-      toast("Image upload failed", { description: error?.response?.data?.message || "Please try again." });
+      toast("Upload failed", { description: error?.response?.data?.message || "Please try again." });
     } finally {
-      setUploading(false);
-      setSelectedFiles(null);
+      setProductUploading(false);
     }
   };
 
   const handleSaveProduct = async () => {
-    if (!form.name.trim()) {
+    if (!productForm.name.trim()) {
       toast("Product name is required");
       return;
     }
-    if (!form.price) {
+    if (!productForm.price) {
       toast("Price is required");
       return;
     }
-    setSaving(true);
+    setProductSaving(true);
     try {
+      const attributes: Record<string, string> = {};
+      productForm.highlights
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .forEach((line) => {
+          const [key, ...rest] = line.split(":");
+          if (!key || rest.length === 0) return;
+          attributes[key.trim()] = rest.join(":").trim();
+        });
+
       const payload = {
-        name: form.name.trim(),
-        price: Number(form.price),
-        originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
-        stock: form.stock ? Number(form.stock) : undefined,
-        category: form.category || undefined,
-        weight: form.weight || undefined,
-        packSize: form.packSize || undefined,
-        description: form.description || undefined,
-        images,
-        image: images[0]?.url,
+        name: productForm.name.trim(),
+        slug: productForm.slug || slugify(productForm.name),
+        price: Number(productForm.price),
+        originalPrice: productForm.originalPrice ? Number(productForm.originalPrice) : undefined,
+        stock: productForm.stock ? Number(productForm.stock) : undefined,
+        category: productForm.category || undefined,
+        weight: productForm.weight || undefined,
+        packSize: productForm.packSize || undefined,
+        description: productForm.description || undefined,
+        images: productImages,
+        image: productImages[0]?.url,
+        attributes: Object.keys(attributes).length ? attributes : undefined,
       };
 
-      const res = await productsAPI.create(payload);
-      if (res.data?.success) {
-        toast("Product added");
-        setForm({ name: "", price: "", originalPrice: "", stock: "", category: "", weight: "", packSize: "", description: "" });
-        setImages([]);
-        await queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      if (editingId) {
+        await productsAPI.update(editingId, payload);
+        toast("Product updated");
       } else {
-        toast("Unable to add product", { description: res.data?.message || "Please try again." });
+        await productsAPI.create(payload);
+        toast("Product created");
       }
+      setEditingId(null);
+      setProductForm({ name: "", slug: "", price: "", originalPrice: "", stock: "", category: "", weight: "", packSize: "", description: "", highlights: "" });
+      setProductImages([]);
+      await queryClient.invalidateQueries({ queryKey: ["admin-products"] });
     } catch (error: any) {
-      toast("Unable to add product", { description: error?.response?.data?.message || "Please try again." });
+      toast("Save failed", { description: error?.response?.data?.message || "Please try again." });
     } finally {
-      setSaving(false);
+      setProductSaving(false);
     }
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingId(product._id);
+    setProductForm({
+      name: product.name || "",
+      slug: product.slug || "",
+      price: String(product.price || ""),
+      originalPrice: String(product.originalPrice || ""),
+      stock: String(product.stock || ""),
+      category: product.category?._id || product.category || "",
+      weight: product.weight || "",
+      packSize: product.packSize || "",
+      description: product.description || "",
+      highlights: product.attributes
+        ? Object.entries(product.attributes).map(([k, v]) => `${k}: ${v}`).join("\n")
+        : "",
+    });
+    setProductImages(Array.isArray(product.images) ? product.images : []);
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -194,477 +281,468 @@ const Admin = () => {
     }
   };
 
-  // Category handlers
   const handleAddCategory = async () => {
-    if (!categoryName.trim()) {
-      toast("Category name is required");
+    if (!categoryForm.name.trim()) {
+      toast("Category name required");
       return;
     }
-    setAddingCategory(true);
     try {
-      const res = await categoriesAPI.create({ name: categoryName.trim() });
-      if (res.data?.success) {
-        toast("Category added");
-        setCategoryName("");
-        await queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
-      } else {
-        toast("Unable to add category", { description: res.data?.message || "Try again" });
-      }
+      await categoriesAPI.create({ name: categoryForm.name.trim(), slug: categoryForm.slug || slugify(categoryForm.name) });
+      setCategoryForm({ name: "", slug: "" });
+      await queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      toast("Category added");
     } catch (error: any) {
-      toast("Failed to add category", { description: error?.response?.data?.message || "Try again" });
-    } finally {
-      setAddingCategory(false);
+      toast("Category add failed", { description: error?.response?.data?.message || "Please try again." });
     }
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (!confirm("Delete this category? Products using it will not be affected.")) return;
+    if (!confirm("Delete this category?")) return;
     try {
       await categoriesAPI.delete(id);
-      toast("Category deleted");
       await queryClient.invalidateQueries({ queryKey: ["admin-categories"] });
+      toast("Category deleted");
     } catch (error: any) {
-      toast("Delete failed", { description: error?.response?.data?.message || "Try again" });
+      toast("Delete failed", { description: error?.response?.data?.message || "Please try again." });
     }
   };
 
-  // Slider handlers
-  const handleSliderImageUpload = async () => {
-    if (!sliderFile) {
-      toast("Select an image first");
+  const handleCreateTeam = async () => {
+    if (!teamForm.name.trim() || !teamForm.role.trim()) {
+      toast("Name and role are required");
       return;
     }
-    setUploadingSlider(true);
     try {
-      const data = new FormData();
-      data.append("my_file", sliderFile);
-      const res = await uploadAPI.uploadImage(data);
-      if (res.data?.success && res.data?.data?.url) {
-        setSliderImage(res.data.data.url);
-        toast("Image uploaded");
+      await teamAPI.create({
+        name: teamForm.name.trim(),
+        role: teamForm.role.trim(),
+        photo: teamForm.photo || undefined,
+        order: Number(teamForm.order) || 0,
+        active: teamForm.active,
+      });
+      setTeamForm({ name: "", role: "", photo: "", order: "0", active: true });
+      await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
+      toast("Team member added");
+    } catch (error: any) {
+      toast("Failed to add member", { description: error?.response?.data?.message || "Please try again." });
+    }
+  };
+
+  const handleUploadTeamPhoto = async () => {
+    if (!teamFile || teamFile.length === 0) {
+      toast("Select a photo to upload");
+      return;
+    }
+    setTeamUploading(true);
+    try {
+      const uploaded = await uploadFiles(teamFile);
+      if (uploaded[0]?.url) {
+        setTeamForm((prev) => ({ ...prev, photo: uploaded[0].url }));
+        toast("Photo uploaded");
       }
     } catch (error: any) {
-      toast("Upload failed", { description: error?.response?.data?.message || "Try again" });
+      toast("Upload failed", { description: error?.response?.data?.message || "Please try again." });
     } finally {
-      setUploadingSlider(false);
+      setTeamUploading(false);
+      setTeamFile(null);
     }
   };
 
-  const handleAddSlider = async () => {
-    if (!sliderImage) {
-      toast("Upload an image first");
+  const handleDeleteTeam = async (id: string) => {
+    if (!confirm("Delete this team member?")) return;
+    try {
+      await teamAPI.delete(id);
+      await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
+      toast("Member deleted");
+    } catch (error: any) {
+      toast("Delete failed", { description: error?.response?.data?.message || "Please try again." });
+    }
+  };
+
+  const handleUploadSlider = async () => {
+    if (!sliderFile || sliderFile.length === 0) {
+      toast("Select an image");
       return;
     }
+    setSliderUploading(true);
     try {
-      const payload = {
-        url: sliderImage,
-        title: sliderTitle || undefined,
-        description: sliderDescription || undefined,
-        sortOrder: sliderOrder ? Number(sliderOrder) : undefined,
-      };
-      const res = await sliderAPI.create(payload);
-      if (res.data?.success) {
-        toast("Slider added");
-        setSliderImage("");
-        setSliderTitle("");
-        setSliderDescription("");
-        setSliderOrder("");
-        setSliderFile(null);
-        await queryClient.invalidateQueries({ queryKey: ["admin-sliders"] });
-      } else {
-        toast("Failed to add slider", { description: res.data?.message || "Try again" });
+      const uploaded = await uploadFiles(sliderFile);
+      if (uploaded.length > 0) {
+        await sliderAPI.create({ url: uploaded[0].url, public_id: uploaded[0].public_id });
+        await queryClient.invalidateQueries({ queryKey: ["admin-slider"] });
+        toast("Slider image added");
       }
     } catch (error: any) {
-      toast("Failed to add slider", { description: error?.response?.data?.message || "Try again" });
+      toast("Upload failed", { description: error?.response?.data?.message || "Please try again." });
+    } finally {
+      setSliderUploading(false);
+      setSliderFile(null);
     }
   };
 
   const handleDeleteSlider = async (id: string) => {
-    if (!confirm("Delete this slider image?")) return;
+    if (!confirm("Remove slider image?")) return;
     try {
       await sliderAPI.delete(id);
-      toast("Slider deleted");
-      await queryClient.invalidateQueries({ queryKey: ["admin-sliders"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-slider"] });
+      toast("Slider image removed");
     } catch (error: any) {
-      toast("Delete failed", { description: error?.response?.data?.message || "Try again" });
-    }
-  };
-
-  // Order handlers
-  const handleUpdateOrderStatus = async (orderId: string, status: string) => {
-    try {
-      await ordersAPI.updateStatus(orderId, { orderStatus: status });
-      toast("Order status updated");
-      await queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
-    } catch (error: any) {
-      toast("Update failed", { description: error?.response?.data?.message || "Try again" });
-    }
-  };
-
-  const handleDeleteOrder = async (id: string) => {
-    if (!confirm("Delete this order?")) return;
-    try {
-      await ordersAPI.delete(id);
-      toast("Order deleted");
-      await queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
-    } catch (error: any) {
-      toast("Delete failed", { description: error?.response?.data?.message || "Try again" });
+      toast("Delete failed", { description: error?.response?.data?.message || "Please try again." });
     }
   };
 
   return (
-    <div className="min-h-screen bg-muted/10 py-12">
-      <div className="container mx-auto px-6 space-y-8">
-        <div>
-          <p className="text-xs uppercase tracking-[0.5em] text-secondary/50">Admin Panel</p>
-          <h1 className="text-3xl font-semibold text-secondary">{current.label}</h1>
-          <p className="text-secondary/70 mt-2">{current.description}</p>
-        </div>
+    <div className="min-h-screen bg-muted/10 py-10">
+      <div className="container mx-auto px-6">
+        <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+          <aside className="space-y-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.5em] text-secondary/50">Admin Panel</p>
+              <h1 className="text-2xl font-semibold text-secondary">{current.label}</h1>
+            </div>
+            <div className="flex flex-col gap-2">
+              {sections.map((s) => (
+                <Button key={s.key} variant={active === s.key ? "default" : "outline"} onClick={() => goTo(s.key)}>
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </aside>
 
-        <div className="flex flex-wrap gap-3">
-          {sections.map((s) => (
-            <Button key={s.key} asChild variant={active === s.key ? "default" : "outline"}>
-              <Link to={`/admin/${s.key}`}>{s.label}</Link>
-            </Button>
-          ))}
-        </div>
+          <main className="space-y-6">
+            {active === "dashboard" && (
+              <div className="grid gap-6 md:grid-cols-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Total Sales</CardTitle>
+                    <CardDescription>Paid orders only</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-3xl font-semibold text-secondary">₹{totalSales.toFixed(0)}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Orders</CardTitle>
+                    <CardDescription>Total orders</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-3xl font-semibold text-secondary">{orders.length}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Products</CardTitle>
+                    <CardDescription>Active catalog items</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-3xl font-semibold text-secondary">{products.length}</p>
+                  </CardContent>
+                </Card>
 
-        {/* Dashboard */}
-        {active === "dashboard" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Dashboard Overview</CardTitle>
-              <CardDescription>Store metrics and quick stats.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Dashboard metrics coming soon. Navigate to other sections to manage your store.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Products Section */}
-        {active === "products" && (
-          <div className="grid gap-8 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Add new product</CardTitle>
-                <CardDescription>Upload images and add product details to your catalog.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Product name</Label>
-                    <Input id="name" value={form.name} onChange={(e) => handleChange("name", e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price</Label>
-                    <Input id="price" type="number" value={form.price} onChange={(e) => handleChange("price", e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="originalPrice">Original price</Label>
-                    <Input id="originalPrice" type="number" value={form.originalPrice} onChange={(e) => handleChange("originalPrice", e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="stock">Stock</Label>
-                    <Input id="stock" type="number" value={form.stock} onChange={(e) => handleChange("stock", e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Input id="category" list="category-list" value={form.category} onChange={(e) => handleChange("category", e.target.value)} />
-                    <datalist id="category-list">
-                      {categories.map((cat: any) => (
-                        <option key={cat._id || cat.id} value={cat._id || cat.slug || cat.name}>{cat.name}</option>
+                <Card className="md:col-span-3">
+                  <CardHeader>
+                    <CardTitle>Sales trend</CardTitle>
+                    <CardDescription>Last 6 months</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-6 gap-3 items-end h-32">
+                      {monthlySales.map((value, idx) => (
+                        <div key={idx} className="flex flex-col items-center gap-2">
+                          <div className="w-full rounded-full bg-primary/15 h-24 flex items-end">
+                            <div
+                              className="w-full rounded-full bg-primary"
+                              style={{ height: `${Math.min(100, (value / (totalSales || 1)) * 120)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">M{idx + 1}</span>
+                        </div>
                       ))}
-                    </datalist>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="weight">Weight</Label>
-                    <Input id="weight" value={form.weight} onChange={(e) => handleChange("weight", e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="packSize">Pack size</Label>
-                    <Input id="packSize" value={form.packSize} onChange={(e) => handleChange("packSize", e.target.value)} />
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" value={form.description} onChange={(e) => handleChange("description", e.target.value)} rows={4} />
-                  </div>
-                </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
-                <Separator />
+            {active === "products" && (
+              <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{editingId ? "Edit product" : "Add new product"}</CardTitle>
+                    <CardDescription>All fields are editable and saved to the live catalog.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Product name</Label>
+                        <Input id="name" value={productForm.name} onChange={(e) => setProductForm((p) => ({ ...p, name: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="slug">Slug</Label>
+                        <Input id="slug" value={productForm.slug} onChange={(e) => setProductForm((p) => ({ ...p, slug: slugify(e.target.value) }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Price</Label>
+                        <Input id="price" type="number" value={productForm.price} onChange={(e) => setProductForm((p) => ({ ...p, price: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="originalPrice">Original price</Label>
+                        <Input id="originalPrice" type="number" value={productForm.originalPrice} onChange={(e) => setProductForm((p) => ({ ...p, originalPrice: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="stock">Stock</Label>
+                        <Input id="stock" type="number" value={productForm.stock} onChange={(e) => setProductForm((p) => ({ ...p, stock: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Select value={productForm.category} onValueChange={(value) => setProductForm((p) => ({ ...p, category: value }))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((cat: any) => (
+                              <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="weight">Weight</Label>
+                        <Input id="weight" value={productForm.weight} onChange={(e) => setProductForm((p) => ({ ...p, weight: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="packSize">Pack size</Label>
+                        <Input id="packSize" value={productForm.packSize} onChange={(e) => setProductForm((p) => ({ ...p, packSize: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2 sm:col-span-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea id="description" rows={4} value={productForm.description} onChange={(e) => setProductForm((p) => ({ ...p, description: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2 sm:col-span-2">
+                        <Label htmlFor="highlights">Highlights (one per line)</Label>
+                        <Textarea id="highlights" rows={3} value={productForm.highlights} onChange={(e) => setProductForm((p) => ({ ...p, highlights: e.target.value }))} />
+                      </div>
+                    </div>
 
-                <div className="space-y-3">
-                  <Label>Product images</Label>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <Input type="file" multiple onChange={(e) => setSelectedFiles(e.target.files)} />
-                    <Button type="button" variant="outline" onClick={handleUpload} disabled={uploading}>
-                      {uploading ? "Uploading..." : <><Upload className="h-4 w-4 mr-2" />Upload</>}
+                    <Separator />
+
+                    <div className="space-y-3">
+                      <Label>Product images</Label>
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <Input type="file" multiple onChange={(e) => setProductFiles(e.target.files)} />
+                        <Button type="button" variant="outline" onClick={handleUploadProductImages} disabled={productUploading}>
+                          {productUploading ? "Uploading..." : "Upload"}
+                        </Button>
+                      </div>
+                      {productImages.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {productImages.map((img, idx) => (
+                            <div key={`${img.url}-${idx}`} className="rounded-lg overflow-hidden border">
+                              <img src={img.url} alt={`Uploaded ${idx + 1}`} className="h-24 w-full object-cover" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button onClick={handleSaveProduct} disabled={productSaving}>
+                        {productSaving ? "Saving..." : editingId ? "Save changes" : "Add product"}
+                      </Button>
+                      {editingId && (
+                        <Button variant="outline" onClick={() => {
+                          setEditingId(null);
+                          setProductForm({ name: "", slug: "", price: "", originalPrice: "", stock: "", category: "", weight: "", packSize: "", description: "", highlights: "" });
+                          setProductImages([]);
+                        }}>
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Product list</CardTitle>
+                    <CardDescription>Click a product to edit or delete it.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {productsLoading && <p className="text-sm text-muted-foreground">Loading products...</p>}
+                    {products.map((product: any) => (
+                      <div key={product._id} className="rounded-xl border p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-secondary">{product.name}</p>
+                            <p className="text-xs text-muted-foreground">₹{Number(product.price || 0).toFixed(0)}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" onClick={() => handleEditProduct(product)}>Edit</Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteProduct(product._id)}>Delete</Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {active === "categories" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categories</CardTitle>
+                  <CardDescription>Create or remove categories for products.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                    <Input placeholder="Category name" value={categoryForm.name} onChange={(e) => setCategoryForm((p) => ({ ...p, name: e.target.value }))} />
+                    <Input placeholder="Slug" value={categoryForm.slug} onChange={(e) => setCategoryForm((p) => ({ ...p, slug: e.target.value }))} />
+                    <Button onClick={handleAddCategory}>Add</Button>
+                  </div>
+                  <Separator />
+                  <div className="space-y-2">
+                    {categories.map((cat: any) => (
+                      <div key={cat._id} className="flex items-center justify-between border-b pb-2 text-sm">
+                        <div>
+                          <p className="font-medium text-secondary">{cat.name}</p>
+                          <p className="text-xs text-muted-foreground">{cat.slug}</p>
+                        </div>
+                        <Button size="sm" variant="ghost" onClick={() => handleDeleteCategory(cat._id)}>Delete</Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {active === "orders" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Orders</CardTitle>
+                  <CardDescription>Full order details with customer address and payment status.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {orders.map((order: any) => (
+                    <div key={order._id} className="rounded-xl border p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-secondary">Order #{order._id}</p>
+                          <p className="text-xs text-muted-foreground">Status: {order.orderStatus} • Payment: {order.paymentStatus}</p>
+                        </div>
+                        <p className="font-semibold">₹{Number(order.totalAmount || 0).toFixed(0)}</p>
+                      </div>
+                      <div className="grid gap-2 text-sm text-muted-foreground">
+                        <p><span className="text-secondary">Name:</span> {order.userName || "Guest"}</p>
+                        <p><span className="text-secondary">Phone:</span> {order.userPhone || order.addressInfo?.phone || "-"}</p>
+                        <p><span className="text-secondary">Email:</span> {order.userEmail || "-"}</p>
+                        <p><span className="text-secondary">Address:</span> {order.addressInfo?.address || "-"}, {order.addressInfo?.city || ""}, {order.addressInfo?.pincode || ""}</p>
+                        {order.addressInfo?.notes && <p><span className="text-secondary">Notes:</span> {order.addressInfo?.notes}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {active === "team" && (
+              <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Add team member</CardTitle>
+                    <CardDescription>Member data is shown in the public team section.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Name</Label>
+                        <Input value={teamForm.name} onChange={(e) => setTeamForm((p) => ({ ...p, name: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Role</Label>
+                        <Input value={teamForm.role} onChange={(e) => setTeamForm((p) => ({ ...p, role: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Order</Label>
+                        <Input type="number" value={teamForm.order} onChange={(e) => setTeamForm((p) => ({ ...p, order: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Photo URL</Label>
+                        <Input value={teamForm.photo} onChange={(e) => setTeamForm((p) => ({ ...p, photo: e.target.value }))} />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Input type="file" onChange={(e) => setTeamFile(e.target.files)} />
+                      <Button variant="outline" onClick={handleUploadTeamPhoto} disabled={teamUploading}>
+                        {teamUploading ? "Uploading..." : "Upload photo"}
+                      </Button>
+                    </div>
+
+                    <Button onClick={handleCreateTeam}>Add member</Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Team list</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {team.map((member: any) => (
+                      <div key={member._id} className="flex items-center justify-between border-b pb-2 text-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full overflow-hidden bg-muted">
+                            {member.photo ? (
+                              <img src={member.photo} alt={member.name} className="h-full w-full object-cover" />
+                            ) : null}
+                          </div>
+                          <div>
+                            <p className="font-medium text-secondary">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">{member.role}</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="ghost" onClick={() => handleDeleteTeam(member._id)}>Delete</Button>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {active === "slider" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Slider images</CardTitle>
+                  <CardDescription>Images are displayed in the homepage hero under the header.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Input type="file" onChange={(e) => setSliderFile(e.target.files)} />
+                    <Button variant="outline" onClick={handleUploadSlider} disabled={sliderUploading}>
+                      {sliderUploading ? "Uploading..." : "Upload slider image"}
                     </Button>
                   </div>
-                  {images.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {images.map((img, idx) => (
-                        <div key={`${img.url}-${idx}`} className="relative rounded-lg overflow-hidden border">
-                          <img src={img.url} alt={`Uploaded ${idx + 1}`} className="h-24 w-full object-cover" />
-                          <button
-                            onClick={() => setImages(images.filter((_, i) => i !== idx))}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
-                <div className="flex gap-3">
-                  <Button onClick={handleSaveProduct} disabled={saving}>
-                    {saving ? "Saving..." : <><Plus className="h-4 w-4 mr-2" />Add product</>}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Products</CardTitle>
-                <CardDescription>Latest items in your catalog.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {productsLoading && (
-                  <p className="text-sm text-muted-foreground">Loading products...</p>
-                )}
-                {Array.isArray(productsData) && productsData.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No products yet.</p>
-                )}
-                {Array.isArray(productsData) && productsData.map((product: any) => (
-                  <div key={product._id} className="rounded-xl border p-3 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="font-medium text-secondary">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">₹{Number(product.price || 0).toFixed(0)}</p>
-                      </div>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product._id)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Categories Section */}
-        {active === "categories" && (
-          <div className="grid gap-8 lg:grid-cols-3">
-            <Card className="lg:col-span-1">
-              <CardHeader>
-                <CardTitle>Add Category</CardTitle>
-                <CardDescription>Create a new product category.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="categoryName">Category Name *</Label>
-                  <Input
-                    id="categoryName"
-                    placeholder="e.g. Spices, Ghee, Snacks"
-                    value={categoryName}
-                    onChange={(e) => setCategoryName(e.target.value)}
-                  />
-                </div>
-                <Button onClick={handleAddCategory} disabled={addingCategory} className="w-full">
-                  {addingCategory ? "Adding..." : <><Plus className="h-4 w-4 mr-2" />Add Category</>}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>All Categories</CardTitle>
-                <CardDescription>Manage your product categories.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {categoriesLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
-                {categories.length === 0 && !categoriesLoading && (
-                  <p className="text-sm text-muted-foreground">No categories yet. Add your first one!</p>
-                )}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {categories.map((cat: any) => (
-                    <div key={cat._id} className="rounded-lg border p-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-secondary">{cat.name}</p>
-                        <p className="text-xs text-muted-foreground">Slug: {cat.slug}</p>
-                      </div>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(cat._id)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Sliders Section */}
-        {active === "sliders" && (
-          <div className="grid gap-8 lg:grid-cols-3">
-            <Card className="lg:col-span-1">
-              <CardHeader>
-                <CardTitle>Add Slider Image</CardTitle>
-                <CardDescription>Upload a new homepage slider image.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="sliderFile">Select Image *</Label>
-                  <Input
-                    id="sliderFile"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setSliderFile(e.target.files?.[0] || null)}
-                  />
-                  <Button onClick={handleSliderImageUpload} disabled={uploadingSlider} variant="outline" className="w-full">
-                    {uploadingSlider ? "Uploading..." : <><Upload className="h-4 w-4 mr-2" />Upload Image</>}
-                  </Button>
-                </div>
-                {sliderImage && (
-                  <div className="rounded-lg border overflow-hidden">
-                    <img src={sliderImage} alt="Slider preview" className="w-full h-32 object-cover" />
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="sliderTitle">Title (optional)</Label>
-                  <Input
-                    id="sliderTitle"
-                    placeholder="Slider title"
-                    value={sliderTitle}
-                    onChange={(e) => setSliderTitle(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sliderDescription">Description (optional)</Label>
-                  <Textarea
-                    id="sliderDescription"
-                    placeholder="Slider description"
-                    value={sliderDescription}
-                    onChange={(e) => setSliderDescription(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sliderOrder">Order (optional)</Label>
-                  <Input
-                    id="sliderOrder"
-                    type="number"
-                    placeholder="Display order"
-                    value={sliderOrder}
-                    onChange={(e) => setSliderOrder(e.target.value)}
-                  />
-                </div>
-                <Button onClick={handleAddSlider} className="w-full" disabled={!sliderImage}>
-                  <Plus className="h-4 w-4 mr-2" />Add Slider
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Slider Images</CardTitle>
-                <CardDescription>Manage homepage carousel images.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {slidersLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
-                {sliders.length === 0 && !slidersLoading && (
-                  <p className="text-sm text-muted-foreground">No sliders yet. Add your first one!</p>
-                )}
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {sliders.map((slider: any) => (
-                    <div key={slider._id} className="rounded-lg border overflow-hidden">
-                      <img src={slider.url || slider.image} alt={slider.title || "Slider"} className="w-full h-40 object-cover" />
-                      <div className="p-3 space-y-2">
-                        {slider.title && <p className="font-medium text-secondary">{slider.title}</p>}
-                        {slider.description && <p className="text-xs text-muted-foreground">{slider.description}</p>}
-                        {slider.sortOrder !== undefined && <p className="text-xs text-muted-foreground">Order: {slider.sortOrder}</p>}
-                        <Button variant="destructive" size="sm" onClick={() => handleDeleteSlider(slider._id)} className="w-full">
-                          <Trash2 className="h-4 w-4 mr-2" />Delete
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {sliders.map((img: any) => (
+                      <div key={img._id} className="rounded-lg overflow-hidden border relative">
+                        <img src={img.url} alt="Slider" className="h-28 w-full object-cover" />
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="absolute top-1 right-1"
+                          onClick={() => handleDeleteSlider(img._id)}
+                        >
+                          Remove
                         </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Orders Section */}
-        {active === "orders" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>All Orders</CardTitle>
-              <CardDescription>Manage customer orders and update status.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {ordersLoading && <p className="text-sm text-muted-foreground">Loading orders...</p>}
-              {orders.length === 0 && !ordersLoading && (
-                <p className="text-sm text-muted-foreground">No orders yet.</p>
-              )}
-              {orders.length > 0 && (
-                <div className="space-y-3">
-                  {orders.map((order: any) => (
-                    <div key={order._id} className="rounded-lg border p-4 space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-medium text-secondary">Order #{order._id?.slice(-8)}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {order.addressInfo?.email || "No email"} • ₹{order.totalAmount}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Payment: {order.paymentStatus} • Order: {order.orderStatus}
-                          </p>
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteOrder(order._id)}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                      <div className="flex gap-2 flex-wrap">
-                        {["pending", "confirmed", "processing", "shipped", "delivered"].map((status) => (
-                          <Button
-                            key={status}
-                            size="sm"
-                            variant={order.orderStatus === status ? "default" : "outline"}
-                            onClick={() => handleUpdateOrderStatus(order._id, status)}
-                          >
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Team, Users sections - Placeholder */}
-        {(active === "team" || active === "users") && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{current.label}</CardTitle>
-              <CardDescription>{current.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                This section is ready to connect with backend API. Implement CRUD operations as needed.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </main>
+        </div>
       </div>
     </div>
   );
