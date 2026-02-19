@@ -186,20 +186,20 @@ const Header = () => {
   );
 
   const mobileActions = user ? (
-    <div className="flex md:hidden items-center gap-2">
-      <Button variant="ghost" size="icon" className="relative text-secondary" onClick={handleCartNavigate}>
-        <ShoppingCart className="h-5 w-5" />
+    <div className="flex md:hidden items-center gap-1">
+      <Button variant="ghost" size="icon" className="relative text-secondary h-9 w-9" onClick={handleCartNavigate}>
+        <ShoppingCart className="h-4 w-4" />
         {totalItems > 0 && (
-          <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-semibold">
+          <span className="absolute -top-0.5 -right-0.5 bg-accent text-accent-foreground rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-semibold">
             {totalItems}
           </span>
         )}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="rounded-full border border-border/70 p-1 focus:outline-none focus:ring-2 focus:ring-primary/40">
-            <Avatar className="h-9 w-9">
-              <AvatarFallback>{initials}</AvatarFallback>
+          <button className="flex items-center justify-center rounded-full w-8 h-8 bg-secondary/10 border border-secondary/20 focus:outline-none focus:ring-2 focus:ring-primary/40">
+            <Avatar className="h-7 w-7">
+              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
@@ -210,7 +210,6 @@ const Header = () => {
             <DropdownMenuItem onClick={() => navigate("/admin")}>Admin Dashboard</DropdownMenuItem>
           ) : null}
           <DropdownMenuItem onClick={() => navigate("/my-orders")}>My Orders</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate("/my-orders")}>My Orders</DropdownMenuItem>
           <DropdownMenuItem onClick={handleCartNavigate}>My Cart</DropdownMenuItem>
           <DropdownMenuItem onClick={handleCheckoutNavigate}>Checkout</DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -219,14 +218,14 @@ const Header = () => {
       </DropdownMenu>
     </div>
   ) : (
-    <div className="flex md:hidden items-center gap-2">
-      <Button variant="ghost" size="icon" className="text-secondary" onClick={() => requestLogin()}>
-        <LogIn className="h-5 w-5" />
+    <div className="flex md:hidden items-center gap-1">
+      <Button variant="ghost" size="icon" className="text-secondary h-9 w-9" onClick={() => requestLogin()}>
+        <LogIn className="h-4 w-4" />
       </Button>
-      <Button variant="ghost" size="icon" className="relative text-secondary" onClick={handleCartNavigate}>
-        <ShoppingCart className="h-5 w-5" />
+      <Button variant="ghost" size="icon" className="relative text-secondary h-9 w-9" onClick={handleCartNavigate}>
+        <ShoppingCart className="h-4 w-4" />
         {totalItems > 0 && (
-          <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-semibold">
+          <span className="absolute -top-0.5 -right-0.5 bg-accent text-accent-foreground rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-semibold">
             {totalItems}
           </span>
         )}
@@ -238,9 +237,9 @@ const Header = () => {
 
   return (
     <header className="border-b border-border/70 bg-background/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
-      <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
-          <div className="flex items-center gap-3 sm:gap-4">
+      <div className="container mx-auto px-3 sm:px-6">
+        <div className="flex items-center justify-between h-14 sm:h-20 gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-4">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden text-secondary">
@@ -313,19 +312,18 @@ const Header = () => {
               </SheetContent>
             </Sheet>
 
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="flex-shrink-0 flex items-center justify-center">
-                <img src={ganeshaMark} alt="Banarasi Thekua" className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14" />
-              </div>
+            <Link to="/" className="flex items-center gap-2 sm:gap-3">
+              <img src={ganeshaMark} alt="Banarasi Thekua" className="w-7 h-7 sm:w-10 sm:h-10 md:w-12 md:h-12 flex-shrink-0" />
               <div className="flex flex-col justify-center min-w-0">
-                <span className="block text-[9px] sm:text-[10px] md:text-[11px] uppercase tracking-[0.25em] sm:tracking-[0.32em] md:tracking-[0.45em] text-accent font-semibold whitespace-nowrap">
+                <span className="hidden sm:block text-[9px] md:text-[11px] uppercase tracking-[0.32em] md:tracking-[0.45em] text-accent font-semibold whitespace-nowrap">
                   Banarasi Thekua
                 </span>
-                <span className="block text-base sm:text-lg md:text-xl lg:text-[22px] font-serif font-semibold text-secondary whitespace-nowrap">
-                  Heritage Mithai Atelier
+                <span className="block text-sm sm:text-base md:text-xl lg:text-[22px] font-serif font-semibold text-secondary leading-tight">
+                  <span className="hidden sm:inline">Heritage Mithai Atelier</span>
+                  <span className="sm:hidden">Banarasi Thekua</span>
                 </span>
               </div>
-            </div>
+            </Link>
           </div>
 
           <nav className="hidden lg:flex items-center text-sm font-medium tracking-wide text-secondary/75 gap-8 xl:gap-10">
