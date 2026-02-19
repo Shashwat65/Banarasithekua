@@ -1,6 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
-import { teamAPI } from '@/services/api';
-import teamPhoto from '@/assets/team-member.jpg';
+import { Star } from "lucide-react";
 
 const reviewGallery = [
   {
@@ -23,12 +21,6 @@ const reviewGallery = [
     name: "Tanishka",
     city: "Bengaluru",
   },
-];
-
-interface TeamMember { _id: string; name: string; role: string; photo?: string; active?: boolean; }
-
-const fallbackTeam: TeamMember[] = [
-  { _id: 'chinmay', name: 'Chinmay Pandey', role: 'Founder & Recipe Lead', photo: teamPhoto },
 ];
 
 const Reviews = () => {
@@ -85,40 +77,5 @@ const Reviews = () => {
       </div>
     </section>
   );
-};
-
-const TeamSection = () => {
-  const { data: teamData } = useQuery({
-    queryKey: ["team", "public"],
-    queryFn: async () => {
-      const res = await teamAPI.getAllPublic();
-      return res.data?.data || [];
-    },
-  });
-
-  const team = (Array.isArray(teamData) && teamData.length > 0) ? teamData : fallbackTeam;
-  return (
-    <div className="space-y-12" id="team">
-          <div className="text-center max-w-2xl mx-auto space-y-4">
-            <p className="text-[10px] sm:text-xs uppercase tracking-[0.6em] text-secondary/50">Our Team</p>
-            <h3 className="text-3xl sm:text-4xl font-semibold text-secondary">People Behind The Craft</h3>
-            <p className="text-secondary/70 text-sm sm:text-base">A small team devoted to preserving traditional flavours while maintaining modern cleanliness and consistency.</p>
-          </div>
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 place-items-center">
-            {team.map(member => (
-              <div key={member._id} className="group relative overflow-hidden rounded-[28px] border border-border/60 bg-white shadow-[0_24px_40px_rgba(84,48,33,0.12)]">
-                <div className="h-72">
-                  <img src={member.photo || 'https://placehold.co/400x600?text=Team'} alt={member.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                </div>
-                <div className="p-5 space-y-1">
-                  <p className="font-semibold text-secondary">{member.name}</p>
-                  <p className="text-xs tracking-[0.35em] uppercase text-secondary/60">{member.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-    </div>
-  );
-};
-
-export default Reviews;
+      </div>
+    </section
