@@ -381,6 +381,7 @@ const Admin = () => {
       });
       setTeamForm({ name: "", role: "", photo: "", order: "0", active: true });
       await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
+      await queryClient.invalidateQueries({ queryKey: ["team", "public"] });
       toast("Team member added");
     } catch (error: any) {
       toast("Failed to add member", { description: error?.response?.data?.message || "Please try again." });
@@ -412,6 +413,7 @@ const Admin = () => {
     try {
       await teamAPI.delete(id);
       await queryClient.invalidateQueries({ queryKey: ["admin-team"] });
+      await queryClient.invalidateQueries({ queryKey: ["team", "public"] });
       toast("Member deleted");
     } catch (error: any) {
       toast("Delete failed", { description: error?.response?.data?.message || "Please try again." });
