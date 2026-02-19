@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { teamAPI } from '@/services/api';
 import teamPhoto from '@/assets/team-member.jpg';
 
@@ -88,19 +88,15 @@ const Reviews = () => {
 };
 
 const TeamSection = () => {
-  const [team, setTeam] = useState<TeamMember[]>(fallbackTeam);
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await teamAPI.getAllPublic();
-        if (Array.isArray(res.data.data) && res.data.data.length > 0) {
-          setTeam(res.data.data);
-          return;
-        }
-      } catch {/* ignore network issues; fallback used */}
-      setTeam(fallbackTeam);
-    })();
-  }, []);
+  const { data: teamData } = useQuery({
+    queryKey: ["team", "public"],
+    queryFn: async () => {
+      const res = await teamAPI.getAllPublic();
+      return res.data?.data || [];
+    },
+  });
+
+  const team = (Array.isArray(teamData) && teamData.length > 0) ? teamData : fallbackTeam;
   return (
     <div className="space-y-12" id="team">
           <div className="text-center max-w-2xl mx-auto space-y-4">
