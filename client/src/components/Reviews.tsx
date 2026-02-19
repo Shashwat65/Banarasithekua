@@ -1,5 +1,3 @@
-import { Star } from "lucide-react";
-
 const reviewGallery = [
   {
     src: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=320&q=80",
@@ -71,11 +69,9 @@ const Reviews = () => {
             </div>
           </div>
         </div>
-
-        {/* Team Section */}
-        <TeamSection />
       </div>
     </section>
   );
-      </div>
-    </section
+};
+
+export default Reviews;
