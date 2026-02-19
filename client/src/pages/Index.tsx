@@ -1,6 +1,7 @@
 import HeroCarousel from "@/components/HeroCarousel";
 import ProductGrid from "@/components/ProductGrid";
 import CoreValues from "@/components/CoreValues";
+import OurTeam from "@/components/OurTeam";
 import Story from "@/components/Story";
 import VideoReviews from "@/components/VideoReviews";
 import BannerDisplay from "@/components/BannerDisplay";
